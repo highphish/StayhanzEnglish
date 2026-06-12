@@ -176,11 +176,12 @@ function b(e, m, n) {
   return i.buffer;
 }
 let h, _;
+const __CFG=new Map(),__SESS=new Map();
 async function N(e, m) {
   h = h ?? await import("./piper-DeOu3H9E.js"), _ = _ ?? globalThis.ort;
   const n = c[e.voiceId], o = JSON.stringify([{ text: e.text.trim() }]);
   _.env.allowLocalModels = !1, _.env.wasm.numThreads = 1, _.env.wasm.wasmPaths = B;
-  const a = await f(`${u}/${n}.json`), i = JSON.parse(await a.text()), t = await new Promise(async (v) => {
+  let i=__CFG.get(n);if(!i){const a=await f(`${u}/${n}.json`);i=JSON.parse(await a.text());__CFG.set(n,i)}const t = await new Promise(async (v) => {
     (await h.createPiperPhonemize({
       print: (l) => {
         v(JSON.parse(l).phoneme_ids);
@@ -197,7 +198,7 @@ async function N(e, m) {
       "--espeak_data",
       "/espeak-ng-data"
     ]);
-  }), r = 0, s = i.audio.sample_rate, d = i.inference.noise_scale, g = i.inference.length_scale, U = i.inference.noise_w, k = await f(`${u}/${n}`, m), y = await _.InferenceSession.create(await k.arrayBuffer()), w = {
+  }), r = 0, s = i.audio.sample_rate, d = i.inference.noise_scale, g = i.inference.length_scale, U = i.inference.noise_w, w0=0;let y=__SESS.get(n);if(!y){const k=await f(`${u}/${n}`, m);y=await _.InferenceSession.create(await k.arrayBuffer());__SESS.set(n,y)}const w = {
     input: new _.Tensor("int64", t, [1, t.length]),
     input_lengths: new _.Tensor("int64", [t.length]),
     scales: new _.Tensor("float32", [d, g, U])

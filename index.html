@@ -158,6 +158,27 @@ input.tx,textarea.tx{width:100%;font-size:17px;padding:12px;border-radius:12px;b
 .hdrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;flex-wrap:wrap}
 .hdrow .nm{flex:1;min-width:140px;font-weight:700}
 .hdrow .pg{font-size:14px;color:var(--brand);font-weight:800;min-width:44px}
+.updbar{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:var(--brand2);color:#fff;padding:10px 18px;border-radius:99px;z-index:40;box-shadow:0 4px 18px rgba(0,0,0,.25);font-size:15px;cursor:pointer;display:block;white-space:nowrap}
+.rgbad{color:var(--bad);font-weight:800;text-decoration:underline wavy var(--bad);text-underline-offset:3px;cursor:pointer;padding:0 2px;border-radius:4px}
+/* Sonidos 비교 패널: 버튼 간 간격을 또렷하게 */
+.sndcmp{display:flex;flex-direction:column;gap:12px;margin:12px 4px 2px}
+.sndcmp .b{width:100%;margin:0;padding:13px 14px;font-size:17px}
+@media(min-width:500px){.sndcmp{flex-direction:row}.sndcmp .b{flex:1;width:auto}}
+/* 🐢 모드 토글: 켜짐/꺼짐이 한눈에 */
+.slowbtn{position:relative}
+.slowbtn.on{background:var(--brand2)!important;color:#fff!important;box-shadow:0 0 0 3px #86efac}
+.slowbtn.on::after{content:'0.5×';position:absolute;bottom:-7px;right:-9px;background:var(--brand2);color:#fff;font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:99px}
+.rgbad:active{background:#fee2e2}
+/* Marcos 한 화면 압축 */
+.fcard{padding:12px 10px}
+.fes{color:var(--muted);margin:1px 0 6px;font-size:15.5px}
+.fex{display:flex;align-items:center;gap:8px;background:#f4f1ea;border-radius:10px;padding:6px 10px;margin:4px 0;text-align:left;width:100%}
+.fex .t{flex:1;font-size:16.5px;line-height:1.3}
+.fex .t small{display:block;color:var(--muted);font-size:13px;line-height:1.25}
+.fex .spk.sm{width:34px;height:34px;font-size:15px}
+.fcard .recbar{margin:8px 0 0;gap:8px}
+.fcard .recbar .b{padding:10px 14px;font-size:16px}
+.fcard .recbar .spk{width:42px;height:42px;font-size:19px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
 .stat b{font-size:26px;display:block;color:var(--brand)}
 .stat small{color:var(--muted)}
@@ -181,6 +202,7 @@ input.tx,textarea.tx{width:100%;font-size:17px;padding:12px;border-radius:12px;b
 <header>
   <button class="back" id="btnBack" style="display:none">←</button>
   <h1 id="hTitle">Inglés desde tu español</h1>
+  <button class="spk sm slowbtn" id="slowHdr" title="modo tortuga: TODO a 0.5×" onclick="toggSlow()">🐢</button>
   <span class="offline-pill" id="netPill">📴 sin internet ✓</span>
   <span class="streak" id="streak">🔥0</span>
 </header>
@@ -263,12 +285,31 @@ function hdVoiceFor(lang){if(!ST.hd||!HD.lib)return null;
  if(want&&HD.stored.includes(want))return want;
  const c=HD_VOICES.find(v=>v.l===lang&&HD.stored.includes(v.id));return c?c.id:null}
 const hdOK=lang=>!!hdVoiceFor(lang);
-function stopHdAudio(){if(HD.audio){try{HD.audio.pause()}catch(e){}HD.audio=null}
+function stopHdAudio(){HD.gen=(HD.gen||0)+1; // 합성 중이던 작업도 무효화
+ if(HD.audio){try{HD.audio.pause()}catch(e){}HD.audio=null}
  if(HD.res){const r=HD.res;HD.res=null;r(false)}}
+// 미리 합성(재생 없이 캐시) — 다음 문장을 기다리는 동안 만들어 둔다
+async function hdPre(text,lang,vid){vid=vid||hdVoiceFor(lang);if(!vid||!HD.lib)return;
+ const key=vid+'|'+text;if(HD.cache.has(key)||HD.pre===key)return;
+ HD.pre=key;
+ try{const b=await HD.lib.predict({text,voiceId:vid});HD.cache.set(key,b)}catch(e){}
+ if(HD.pre===key)HD.pre=null}
+// 시작 시 예열: 모델 세션·WASM을 미리 깨워 첫 문장 지연 제거
+async function hdWarm(){if(!ST.hd)return;if(!await hdInit())return;
+ const ve=hdVoiceFor('en'),vs=hdVoiceFor('es');
+ if(ve)await hdPre('Hello.','en',ve);
+ if(vs)hdPre('Hola.','es',vs)}
+function hdBusy(on){let e=document.getElementById('hdbusy');
+ if(!e){e=document.createElement('div');e.id='hdbusy';e.className='updbar';e.style.background='var(--brand)';
+  e.textContent='✨ creando la voz…';document.body.appendChild(e)}
+ e.style.display=on?'block':'none'}
 async function hdSpeak(text,lang,rate,vid){vid=vid||hdVoiceFor(lang);if(!vid||!HD.lib)return false;
+ const gen=HD.gen||0; // 이 재생 요청의 세대 — 중간에 정지되면 무효
  try{const key=vid+'|'+text;let blob=HD.cache.get(key);
-  if(!blob){blob=await HD.lib.predict({text,voiceId:vid});
+  if(!blob){hdBusy(true);
+   try{blob=await HD.lib.predict({text,voiceId:vid})}finally{hdBusy(false)}
    HD.cache.set(key,blob);if(HD.cache.size>150)HD.cache.delete(HD.cache.keys().next().value)}
+  if((HD.gen||0)!==gen)return false; // 합성하는 사이에 정지/이동됨 — 재생하지 않는다
   return await new Promise(res=>{stopHdAudio();HD.res=res;
    const a=new Audio(URL.createObjectURL(blob));HD.audio=a;
    a.playbackRate=Math.max(0.5,Math.min(2,(rate||ST.rate||0.95)/0.95));
@@ -288,21 +329,29 @@ function stopBar(show){let b=document.getElementById('stopbar');
   document.body.appendChild(b)}
  const mv=document.getElementById('sbMiVoz');if(mv)mv.style.display=lastAudio?'':'none';
  b.style.display=show?'flex':'none'}
-function speak(text,lang,rate){try{speechSynthesis.cancel()}catch(e){}
+// 🐢 모드: 켜지면 모든 재생이 0.5× (Cuentos 리더는 슬라이더가 지배 — 제외)
+const effRate=(rate,noSlow)=>noSlow?(rate||parseFloat(ST.rate)||0.95):(ST.slow?0.5:(rate||ST.rate||0.92));
+window.toggSlow=()=>{ST.slow=!ST.slow;save();
+ document.querySelectorAll('.slowbtn').forEach(b=>b.classList.toggle('on',!!ST.slow));
+ speak(ST.slow?'Slow mode.':'Normal speed.','en')};
+function speak(text,lang,rate,noSlow){try{speechSynthesis.cancel()}catch(e){}
  stopHdAudio();
- if(hdOK(lang)){hdSpeak(text,lang,rate);return}
+ const R=effRate(rate,noSlow);
+ if(hdOK(lang)){hdSpeak(text,lang,R);return}
  try{const u=new SpeechSynthesisUtterance(text);u.lang=lang==='en'?'en-US':'es-MX';
- const v=pickVoice(lang);if(v)u.voice=v;u.rate=rate||ST.rate||0.92;speechSynthesis.speak(u);}catch(e){}}
+ const v=pickVoice(lang);if(v)u.voice=v;u.rate=R;speechSynthesis.speak(u);}catch(e){}}
 window.spk=(t,l,r)=>speak(t,l,r);
+window.spkBook=(t,r)=>speak(t,'en',r,true); // cuentos: 슬라이더 속도 그대로
 // habla y ESPERA a que termine + pausa antes de seguir (evita cortes)
 function speakThen(text,lang,rate,pause,cb){
+ const R=effRate(rate);
  if(hdOK(lang)){try{speechSynthesis.cancel()}catch(e){}
   let done=false;const fin=()=>{if(done)return;done=true;setTimeout(cb,pause)};
-  hdSpeak(text,lang,rate).then(fin).catch(fin);
-  setTimeout(fin,6000+text.length*120);return}
+  hdSpeak(text,lang,R).then(fin).catch(fin);
+  setTimeout(fin,6000+text.length*(ST.slow?240:120));return}
  try{speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);u.lang=lang==='en'?'en-US':'es-MX';
-  const v=pickVoice(lang);if(v)u.voice=v;u.rate=rate||0.92;
+  const v=pickVoice(lang);if(v)u.voice=v;u.rate=R;
   let done=false;const fin=()=>{if(done)return;done=true;setTimeout(cb,pause)};
   u.onend=fin;u.onerror=fin;
   setTimeout(fin,2000+text.length*100); // red de seguridad si onend no llega
@@ -315,7 +364,9 @@ async function toggleRec(btn,target){
  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});
   mediaRec=new MediaRecorder(st);chunks=[];
   mediaRec.ondataavailable=e=>chunks.push(e.data);
-  mediaRec.onstop=()=>{lastAudio=URL.createObjectURL(new Blob(chunks,{type:mediaRec.mimeType||'audio/mp4'}));
+  mediaRec.onstop=()=>{
+   if(lastAudio){try{URL.revokeObjectURL(lastAudio)}catch(e){}}
+   lastAudio=chunks.length?URL.createObjectURL(new Blob(chunks,{type:mediaRec.mimeType||'audio/mp4'})):lastAudio;
    st.getTracks().forEach(t=>t.stop());stopBar(true);};
   mediaRec.start();recOn=true;btn.textContent='⏹️ Parar';btn.classList.add('r');
  }catch(e){alert('Permita el micrófono para practicar su voz. / 마이크 권한을 허용하세요.')}}
@@ -325,31 +376,74 @@ function playMe(){if(lastAudio){try{speechSynthesis.cancel()}catch(e){}stopHdAud
 // reconocimiento (solo con internet)
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function recogBtn(target){ if(!SR)return '';
- return `<button class="b w" onclick="recog('${esc(target).replace(/'/g,"\\'")}',this)">🎤 Hablar y comparar</button>`}
-window.recog=(target,btn)=>{ if(!navigator.onLine){alert('Esta función necesita internet. Sin internet: grabe y compare con el oído 👂');return}
- const r=new SR();r.lang='en-US';btn.textContent='🎤 ...escuchando';
- r.onresult=e=>{const said=e.results[0][0].transcript;
-  const A=said.toLowerCase().replace(/[^a-z' ]/g,'').split(/\s+/),B=target.toLowerCase().replace(/[^a-z' ]/g,'').split(/\s+/);
-  const hit=B.filter(w=>A.includes(w)).length, pct=Math.round(100*hit/B.length);
-  btn.insertAdjacentHTML('afterend',`<div class="score">${pct>=80?'🌟':pct>=50?'💪':'👂'} ${pct}%<div class="muted" style="font-size:15px">Usted dijo: “${esc(said)}”</div></div>`);
-  btn.textContent='🎤 Hablar y comparar';};
- r.onerror=()=>{btn.textContent='🎤 Hablar y comparar'};r.start();}
+ return `<button class="b w" onclick="recog('${esc(target).replace(/'/g,"\\'")}',this)">🎤 Decir y comparar</button>`}
+const RG={on:false,r:null};
+window.recog=(target,btn)=>{
+ if(RG.on)return; // 두 번 누름 방지
+ if(!navigator.onLine){alert('Esta función necesita internet. Sin internet: grabe con 🎙️ y compare con el oído 👂');return}
+ if(recOn){try{mediaRec.stop()}catch(e){}recOn=false} // 마이크 충돌 방지: 녹음 먼저 종료
+ try{speechSynthesis.cancel()}catch(e){}
+ stopHdAudio();
+ // 무엇을 말해야 하는지 명확히 보여주는 패널
+ let p=btn.parentElement.querySelector('.rgpanel');
+ if(!p){btn.insertAdjacentHTML('afterend','<div class="rgpanel note" style="flex-basis:100%;text-align:center"></div>');
+  p=btn.parentElement.querySelector('.rgpanel')}
+ p.innerHTML=`🗣️ Diga esta frase, fuerte y claro:<br><b style="font-size:19px">“${esc(target)}”</b> ${spkBtn(target,'en','0.85')}
+  <br><span class="rgst" style="font-weight:700">🎙️ escuchando…</span>`;
+ const stEl=()=>p.querySelector('.rgst');
+ let r;try{r=new SR()}catch(e){p.innerHTML='⚠️ Este teléfono no tiene reconocimiento de voz.';return}
+ r.lang='en-US';r.maxAlternatives=1;RG.on=true;RG.r=r;
+ const done=()=>{RG.on=false;RG.r=null;btn.textContent='🎤 Decir y comparar';clearTimeout(tm)};
+ const tm=setTimeout(()=>{try{r.abort()}catch(e){}done();
+  const s=stEl();if(s)s.innerHTML='😶 No le escuché. Toque el botón e intente otra vez.'},9000);
+ btn.textContent='🎤 …escuchando';
+ r.onresult=e=>{done();const said=e.results[0][0].transcript;
+  const norm=w=>w.toLowerCase().replace(/[^a-z']/g,'');
+  const T=target.split(/\s+/).filter(Boolean),Tn=T.map(norm),Sn=said.split(/\s+/).map(norm).filter(Boolean);
+  // 순서를 고려한 정렬(LCS): 어떤 단어가 통과/누락됐는지
+  const n=Tn.length,m=Sn.length,dp=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let a=n-1;a>=0;a--)for(let b=m-1;b>=0;b--)
+   dp[a][b]=Tn[a]===Sn[b]?dp[a+1][b+1]+1:Math.max(dp[a+1][b],dp[a][b+1]);
+  const hitSet=new Set();let a=0,b=0;
+  while(a<n&&b<m){if(Tn[a]===Sn[b]){hitSet.add(a);a++;b++}
+   else if(dp[a+1][b]>=dp[a][b+1])a++;else b++}
+  const pct=Math.round(100*hitSet.size/n);
+  const marked=T.map((w,ix)=>hitSet.has(ix)
+   ?`<span style="color:var(--good);font-weight:800">${esc(w)}</span>`
+   :`<span class="rgbad" onclick="spk('${esc(w).replace(/'/g,"\\'")}','en',0.75)">${esc(w)}</span>`).join(' ');
+  const s=stEl();if(s)s.innerHTML=`${pct>=80?'🌟':pct>=50?'💪':'👂'} <b>${pct}%</b><br>
+   <span style="font-size:19px;line-height:1.6">${marked}</span>
+   <br><small class="muted">usted dijo: “${esc(said)}”</small>
+   ${pct<100?'<br><small>🔴 toque la palabra roja para oírla despacio — y diga la frase otra vez</small>':''}`};
+ r.onerror=(e)=>{done();const s=stEl();
+  if(s)s.innerHTML=e&&e.error==='not-allowed'?'⚠️ Permita el micrófono en el navegador.':'⚠️ No funcionó — intente de nuevo.'};
+ r.onend=()=>{if(RG.on){done();const s=stEl();if(s)s.innerHTML='😶 No le escuché — intente otra vez.'}};
+ try{r.start()}catch(e){done();const s=stEl();if(s)s.innerHTML='⚠️ El micrófono está ocupado — espere un momento e intente.'}};
 function recBar(target){return `<div class="recbar">
- <button class="spk" onclick="spk('${esc(target).replace(/'/g,"\\'")}','en',0.8)" title="lento">🐢</button>
- <button class="spk" onclick="spk('${esc(target).replace(/'/g,"\\'")}','en',1)" title="normal">🔊</button>
+ <button class="spk slowbtn ${ST.slow?'on':''}" onclick="toggSlow()" title="modo tortuga 0.5× — toque para ${ST.slow?'apagar':'encender'}">🐢</button>
+ <button class="spk" onclick="spk('${esc(target).replace(/'/g,"\\'")}','en')" title="escuchar">🔊</button>
  <button class="b" onclick="toggleRec(this,'')">🎙️ Grabar</button>
  <button class="b" onclick="playMe()">▶️ Mi voz</button>
  ${recogBtn(target)}</div>`}
 window.toggleRec=toggleRec;window.playMe=playMe;
 // ================= router =================
 const stack=[];
-function go(fn,...args){
+function navCleanup(){ // 화면을 떠나는 순간, 소리는 전부 멈춘다
+ if(recOn){try{mediaRec.stop()}catch(e){}recOn=false} // 녹음은 '저장하며' 종료
+ if(typeof RG!=='undefined'&&RG.on){try{RG.r&&RG.r.abort()}catch(e){}RG.on=false}
  if(RD.on||(typeof INT!=='undefined'&&INT&&INT.on)||(typeof playing!=='undefined'&&playing))stopAll();
- else stopBar(false);
+ else{try{speechSynthesis.cancel()}catch(e){}stopHdAudio();stopBar(false)}}
+function navChrome(fn){ // 🐢는 cuentos(슬라이더 구역)에서는 숨긴다
+ const sh=document.getElementById('slowHdr');
+ if(sh)sh.style.display=(fn===bookScr||fn===booksHome)?'none':'';
+ $('#btnBack').style.display=stack.length>1?'':'none'}
+function go(fn,...args){
+ navCleanup();
  stack.push([fn,args]);fn(...args);window.scrollTo(0,0);
- $('#btnBack').style.display=stack.length>1?'':'none';}
-$('#btnBack').onclick=()=>{stack.pop();const[fn,args]=stack[stack.length-1];fn(...args);
- $('#btnBack').style.display=stack.length>1?'':'none';window.scrollTo(0,0);};
+ navChrome(fn);}
+$('#btnBack').onclick=()=>{navCleanup();
+ stack.pop();const[fn,args]=stack[stack.length-1];fn(...args);
+ navChrome(fn);window.scrollTo(0,0);};
 document.querySelectorAll('footer button').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('footer button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
  stack.length=0;go({home,vocab:vocabHome,verbs:verbsHome,sos:sosHome,stories:storiesHome}[b.dataset.nav]);});
@@ -575,6 +669,12 @@ window.suAns=(ans)=>{const q=su.items[su.i],right=ans===q.ok;if(right)su.ok++;
  document.getElementById('sTxt').style.filter='';
  document.getElementById('sWhy').innerHTML=`<div class="note ${right?'':'w'}">${right?'✅':'❌'} ${q.ok?'Suena bien.':'Suena mal — '+esc(q.why||'')}</div>`;
  setTimeout(()=>{su.i++;suenaScr()},q.ok?900:2400);};
+function sosxQuiz(){runQuiz(shuf(SOSX).slice(0,10).map(qSOSX),'🧰 ¿Cómo se dice?',r=>{
+ main.innerHTML=`<div class="card center"><p style="font-size:46px">${r.ok>=8?'🌟':'💪'}</p>
+ <p class="score">${r.ok}/${r.n}</p>
+ <p class="muted">Las que falló vuelven mañana en el repaso — así se llena el botiquín.</p>
+ <div class="row"><button class="b p big" onclick="go(sosxQuiz)">Otra ronda</button>
+ <button class="b" onclick="go(sosHome)">🧰 Por situación</button></div></div>`})}
 // ================= VERBOS COMODÍN (light verbs) =================
 const LVC_ICO={take:'🤲',make:'🔨',have:'☕',give:'🎁',do:'✅'};
 function lvcHome(){title('🃏 Verbos comodín');
@@ -671,16 +771,67 @@ const SOSPIC=[
  // 10 is that correct?: check en tarjeta
  `<svg viewBox="0 0 100 100"><rect x="18" y="20" width="64" height="60" rx="10" ${_S}/><path ${_S} d="M32 52l12 12 24-28"/></svg>`];
 function sosHome(){title('🆘 SOS');
+ const cats=[...new Set(SOSX.map(x=>x.cat))];
  main.innerHTML=`<p class="center muted">Si no entiende: ¡NUNCA en silencio! Pregunte en 1 segundo.
- <button class="spk sm" onclick="spk('Cuando no entienda algo, no se quede en silencio. Use una de estas ocho frases. Preguntar es ganar.','es')">🔊</button></p>
+ <button class="spk sm" onclick="spk('Cuando no entienda algo, no se quede en silencio. Primero el kit de ocho: su reflejo de un segundo. Después, el botiquín por situaciones: entre a cada una y practique frase por frase.','es')">🔊</button></p>
+ <p style="font-weight:800;margin:10px 0 2px">⚡ El reflejo</p>
  <div class="list">
-  <div class="litem" onclick="go(sosCards,0)"><span class="ico">🃏</span><div class="tx"><b>Las 8 frases + 2 bonus</b><small>aprender con gesto</small></div>›</div>
-  <div class="litem" onclick="go(sosEco,0)"><span class="ico">🗣️</span><div class="tx"><b>Eco con gesto</b><small>cada frase ×3, boca y mano juntas</small></div>›</div>
+  <div class="litem" onclick="go(sosCards,0)"><span class="ico">🃏</span><div class="tx"><b>El kit de 1 segundo</b><small>8 frases + 2 bonus, con gesto</small></div>›</div>
+  <div class="litem" onclick="go(sosEco,0)"><span class="ico">🗣️</span><div class="tx"><b>Eco con gesto</b><small>cada frase ×3</small></div>›</div>
   <div class="litem" onclick="go(sosFire)"><span class="ico">⚡</span><div class="tx"><b>¡Dispara!</b><small>situación → frase en 1 segundo</small></div>›</div>
-  <div class="litem" onclick="go(sosInt)"><span class="ico">✋</span><div class="tx"><b>¡Interrumpa!</b><small>escuche la historia — pare al oír la trampa</small></div>›</div>
+  <div class="litem" onclick="go(sosInt)"><span class="ico">✋</span><div class="tx"><b>¡Interrumpa!</b><small>pare la historia al oír la trampa</small></div>›</div>
+ </div>
+ <p style="font-weight:800;margin:16px 0 2px">🧰 El botiquín — por situación</p>
+ <div class="list">
+  ${cats.map(c=>{const n=SOSX.filter(x=>x.cat===c).length;
+   return `<div class="litem" onclick="go(sosCatScr,'${esc(c).replace(/'/g,"\\'")}')"><span class="ico">${c.split(' ')[0]}</span><div class="tx"><b>${esc(c.slice(c.indexOf(' ')+1))}</b><small>${n} frases — practique una por una</small></div>›</div>`}).join('')}
+  <div class="litem" onclick="go(sosxQuiz)"><span class="ico">🎯</span><div class="tx"><b>Quiz de todo el botiquín</b><small>10 frases mezcladas</small></div>›</div>
  </div>
  <p class="note">💡 La frase #8 es su escudo: <b>I'm learning English.</b> Dígala primero y la gente hablará más despacio.</p>
- <p class="note w">⚡ Regla de oro: silencio de 3 segundos = perder · preguntar = ganar. Aunque la frase salga imperfecta, ¡disparar ya es medio punto!</p>`}
+ <p class="note w">⚡ Regla de oro: silencio de 3 segundos = perder · preguntar = ganar.</p>`}
+// ===== 카테고리 → 문장 목록 → 문장별 연습 =====
+function sosCatScr(cat){title(cat.split(' ')[0]+' '+cat.slice(cat.indexOf(' ')+1));
+ const items=SOSX.filter(x=>x.cat===cat);
+ main.innerHTML=`<p class="center muted">Toque una frase para practicarla — escuchar, decir ×3, grabarse.</p>
+ ${items.map((x,i)=>`<div class="fex" onclick="go(sosPrScr,'${esc(cat).replace(/'/g,"\\'")}',${i})">
+  <button class="spk sm" onclick="event.stopPropagation();spk('${esc(x.en).replace(/'/g,"\\'")}','en')">🔊</button>
+  <div class="t">${esc(x.en)}<small>${esc(x.es)}</small></div><span class="muted">›</span></div>`).join('')}
+ <div class="row" style="margin-top:10px"><button class="b p big" onclick="sosCatQuiz('${esc(cat).replace(/'/g,"\\'")}')">🎯 Quiz de esta sección</button></div>`}
+let sosPrN=0;
+function sosPrScr(cat,i){const items=SOSX.filter(x=>x.cat===cat);
+ const x=items[i];
+ if(!x){main.innerHTML=`<div class="card center"><p style="font-size:44px">💪</p><p><b>¡Sección completa!</b></p>
+  <div class="row"><button class="b p big" onclick="sosCatQuiz('${esc(cat).replace(/'/g,"\\'")}')">🎯 Quiz de la sección</button>
+  <button class="b" onclick="go(sosCatScr,'${esc(cat).replace(/'/g,"\\'")}')">← Lista</button></div></div>`;return}
+ title(cat.split(' ')[0]+' '+(i+1)+'/'+items.length);
+ sosPrN=0;
+ main.innerHTML=`<div class="progress"><div style="width:${i/items.length*100}%"></div></div>
+ <div class="card center">
+  <p class="bigword en" style="font-size:clamp(20px,5.5vw,27px)">${esc(x.en)} ${spkBtn(x.en,'en')}</p>
+  <p class="fes">${esc(x.es)} ${spkBtn(x.es,'es')}</p>
+  <p class="muted" style="font-size:14px">Escuche → dígala EN VOZ ALTA → toque ✓. Tres veces.</p>
+  <p id="prDots" style="font-size:28px;margin:4px 0">⚪⚪⚪</p>
+  <button class="b g big" onclick="sosPrTap('${esc(cat).replace(/'/g,"\\'")}',${i})">✓ La dije</button>
+  ${recBar(x.en)}
+ </div>
+ <div class="row" style="margin-top:6px">
+  <button class="b" onclick="go(sosPrScr,'${esc(cat).replace(/'/g,"\\'")}',${Math.max(0,i-1)})">←</button>
+  <span class="muted">${i+1}/${items.length}</span>
+  <button class="b g" onclick="go(sosPrScr,'${esc(cat).replace(/'/g,"\\'")}',${i+1})">Siguiente →</button></div>`;
+ spk(x.en,'en')}
+window.sosPrTap=(cat,i)=>{sosPrN++;
+ const d=document.getElementById('prDots');
+ if(d)d.textContent='🟢'.repeat(Math.min(sosPrN,3))+'⚪'.repeat(Math.max(0,3-sosPrN));
+ const items=SOSX.filter(x=>x.cat===cat),x=items[i];
+ if(sosPrN>=3){gradeItem('sx|'+x.en,true,'SOS');track('sos',true);
+  setTimeout(()=>go(sosPrScr,cat,i+1),450)}
+ else spk(x.en,'en')};
+window.sosCatQuiz=(cat)=>{const pool=SOSX.filter(x=>x.cat===cat);
+ const items=shuf(pool).slice(0,Math.min(8,pool.length)).map(qSOSX);
+ runQuiz(items,cat,r=>{main.innerHTML=`<div class="card center"><p style="font-size:46px">${r.ok>=r.n*0.75?'🌟':'💪'}</p>
+  <p class="score">${r.ok}/${r.n}</p>
+  <div class="row"><button class="b p big" onclick="sosCatQuiz('${esc(cat).replace(/'/g,"\\'")}')">Otra vez</button>
+  <button class="b" onclick="go(sosCatScr,'${esc(cat).replace(/'/g,"\\'")}')">← Lista</button></div></div>`})};
 function sosCards(i){title('🃏 SOS '+(i+1)+'/'+SOS.length);
  const c=SOS[i];if(!c){main.innerHTML=`<div class="card center">💪 ¡Listo! Ahora: <button class="b p big" onclick="go(sosEco,0)">🗣️ Eco con gesto</button></div>`;return}
  main.innerHTML=`<div class="progress"><div style="width:${i/SOS.length*100}%"></div></div>
@@ -794,16 +945,16 @@ function fillFrame(tpl,fill){let out=tpl;
 function frameScr(i){title('🧩 Marcos');
  const f=FRAMES[i];if(!f){main.innerHTML=`<div class="card center">🎉 ¡Todos los marcos! <button class="b p big" onclick="go(frameScr,0)">Otra vez</button></div>`;return}
  const ex=f.fill.map(x=>x.split('|'));
- main.innerHTML=`<div class="progress"><div style="width:${i/FRAMES.length*100}%"></div></div>
- <div class="card center">
-  <p class="bigword en" style="font-size:30px">${esc(f.en)} <button class="spk" onclick="spk('${esc(f.en.replace('___','...')).replace(/'/g,"\\'")}','en')">🔊</button></p>
-  <p class="muted">${esc(f.es)}</p>
-  <div class="list" style="margin-top:10px">${ex.map(e=>{const full=fillFrame(f.en,e[0]),fes=fillFrame(f.es,e[1]||'');
-   return `<div class="storyline"><button class="spk sm" onclick="spk('${esc(full).replace(/'/g,"\\'")}','en')">🔊</button>
-   <div class="txt">${esc(full)}<span class="es">${esc(fes)}</span></div></div>`}).join('')}</div>
+ main.innerHTML=`<div class="progress" style="margin:2px 0 6px"><div style="width:${i/FRAMES.length*100}%"></div></div>
+ <div class="card center fcard">
+  <p class="bigword en" style="font-size:clamp(20px,5.5vw,26px);margin:0">${esc(f.en)} <button class="spk sm" onclick="spk('${esc(f.en.replace('___','...')).replace(/'/g,"\\'")}','en')">🔊</button></p>
+  <p class="fes">${esc(f.es)}</p>
+  ${ex.map(e=>{const full=fillFrame(f.en,e[0]),fes=fillFrame(f.es,e[1]||'');
+   return `<div class="fex"><button class="spk sm" onclick="spk('${esc(full).replace(/'/g,"\\'")}','en')">🔊</button>
+   <div class="t">${esc(full)}<small>${esc(fes)}</small></div></div>`}).join('')}
   ${recBar(fillFrame(f.en,ex[0][0]))}
  </div>
- <div class="row"><button class="b" onclick="go(frameScr,${Math.max(0,i-1)})">←</button>
+ <div class="row" style="margin-top:6px"><button class="b" onclick="go(frameScr,${Math.max(0,i-1)})">←</button>
  <span class="muted">${i+1}/${FRAMES.length}</span>
  <button class="b g" onclick="go(frameScr,${i+1})">Siguiente →</button></div>`}
 let pq=null;
@@ -890,10 +1041,11 @@ function buildCast(s){SCAST={};SCASTHD={};if(!s.dialog)return;
  who.forEach((w,i)=>{SCAST[w]=pal[i%pal.length]})}
 window.spkWho=(text,who,rate)=>{try{speechSynthesis.cancel()}catch(e){}
  stopHdAudio();
- if(hdOK('en')){hdSpeak(text,'en',rate,(who&&SCASTHD[who])||null);return}
+ const R=effRate(rate);
+ if(hdOK('en')){hdSpeak(text,'en',R,(who&&SCASTHD[who])||null);return}
  try{const u=new SpeechSynthesisUtterance(text);u.lang='en-US';
  const v=(who&&SCAST[who])||pickVoice('en');if(v)u.voice=v;
- u.rate=rate||ST.rate||0.92;speechSynthesis.speak(u);}catch(e){}};
+ u.rate=R;speechSynthesis.speak(u);}catch(e){}};
 function storyScr(ix){title((STORIES[ix].ico||'🎧')+' '+STORIES[ix].tt);
  const s=STORIES[ix];stShow=stShow||false;buildCast(s);
  main.innerHTML=`
@@ -919,9 +1071,12 @@ window.trapTap=(w,def)=>{spk('What does '+w+' mean?','en');
  setTimeout(()=>alert('What does "'+w+'" mean?\n→ '+def),300);};
 let playing=false;
 window.playAll=async(ix,rate)=>{const s=STORIES[ix];if(playing){stopAll();return}
+ rate=effRate(rate);
  playing=true;stopBar(true);
- for(const L of s.lines){ if(!playing)break;
-  if(hdOK('en')){await hdSpeak(L.en,'en',rate,(L.who&&SCASTHD[L.who])||null);}
+ for(let li=0;li<s.lines.length;li++){const L=s.lines[li];if(!playing)break;
+  if(hdOK('en')){
+   const nx=s.lines[li+1];if(nx)hdPre(nx.en,'en',(nx.who&&SCASTHD[nx.who])||null);
+   await hdSpeak(L.en,'en',rate,(L.who&&SCASTHD[L.who])||null);}
   else await new Promise(res=>{const u=new SpeechSynthesisUtterance(L.en);u.lang='en-US';
    const v=(L.who&&SCAST[L.who])||pickVoice('en');if(v)u.voice=v;u.rate=rate;
    let done=false;const fin=()=>{if(!done){done=true;res()}};
@@ -980,7 +1135,7 @@ function bookScr(ix){title('📖 '+BOOKS[ix].tt);
  ${s.lines.map((L,li)=>`<div class="bline ${li===pos?'cur':''} ${RD.a===li?'mA':''} ${RD.b===li?'mB':''}" id="bl${li}" onclick="bkTap(${ix},${li})">
    <span class="n">${li+1}</span>
    <div class="txt">${noticeHL(esc(L.en))}${bkES?`<span class="es">${esc(L.es)}</span>`:''}</div>
-   <button class="spk sm" onclick="event.stopPropagation();spk('${esc(L.en).replace(/'/g,"\\'")}','en')">🔊</button>
+   <button class="spk sm" onclick="event.stopPropagation();spkBook('${esc(L.en).replace(/'/g,"\\'")}')">🔊</button>
   </div>`).join('')}
  <div class="card center"><p><b>Ahora usted 🗣️</b> — lea en voz alta y grábese</p>${recBar(s.lines[pos]?s.lines[pos].en:s.lines[0].en)}</div>
  ${SES.on&&SES.stage===1?'<button class="b g big" onclick="sesNext()">✅ Hecho — seguir la sesión →</button>':''}`}
@@ -1004,6 +1159,7 @@ window.bkPlay=async(ix)=>{const s=BOOKS[ix],btn=document.getElementById('bkBtn')
   if(i>=s.lines.length){ST.bookPos[s.id]=0;save();break}
   hiLine(ix,i);ST.bookPos[s.id]=i;save();
   try{speechSynthesis.cancel()}catch(e){}
+  if(hdOK('en')&&s.lines[i+1])hdPre(s.lines[i+1].en,'en'); // 다음 문장 선합성
   await speakLine(s.lines[i].en);
   if(!RD.on)break;
   await new Promise(r=>setTimeout(r,700));
@@ -1045,7 +1201,7 @@ async function hdScr(){title('✨ Voz HD');
  <button class="spk sm" onclick="spk('Estas voces de alta calidad se descargan una sola vez con wifi. Después funcionan sin internet, para siempre. Elija una voz de inglés y una de español.','es')">🔊</button></p>
  <div class="card"><label style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px">
   <input type="checkbox" style="width:26px;height:26px" ${ST.hd?'checked':''}
-   onchange="ST.hd=this.checked;save();if(ST.hd)hdInit()"> Usar Voz HD ✨</label>
+   onchange="ST.hd=this.checked;save();if(ST.hd)hdWarm()"> Usar Voz HD ✨</label>
   <p class="muted" style="font-size:15px">Apagado = voz normal del teléfono. La primera frase puede tardar 1–2 segundos (el cerebro de la voz está pensando).</p></div>
  <p style="font-weight:800;margin:14px 0 2px">🇺🇸 Inglés</p>
  ${HD_VOICES.filter(v=>v.l==='en').map(row).join('')}
@@ -1059,7 +1215,7 @@ window.hdDl=async(id)=>{const btn=document.getElementById('dl-'+id),pg=document.
   if(!ST.hd){ST.hd=true;save()}
   const v=HD_VOICES.find(x=>x.id===id);
   if(v){if(v.l==='en'&&!ST.hdVoiceEN){ST.hdVoiceEN=id}if(v.l==='es'&&!ST.hdVoiceES){ST.hdVoiceES=id}save()}
-  go(hdScr)}
+  hdWarm();go(hdScr)}
  catch(e){alert('No se pudo descargar. Revise el internet e intente de nuevo.');go(hdScr)}};
 window.hdUse=(id,l)=>{if(l==='en')ST.hdVoiceEN=id;else ST.hdVoiceES=id;save();go(hdScr)};
 window.hdDel=async(id)=>{try{await HD.lib.remove(id)}catch(e){}
@@ -1088,7 +1244,28 @@ function helpScr(){title('❓ Ayuda');
  <div class="card"><b>👩‍🏫 Para profesores</b>
   <p>Método: frases completas, sin términos de gramática · oído primero, letras después · transferencia del español (cognados, comí→ate) · SOS: silencio = perder · corrección: 1 por frase.<br>
   Ruta sugerida: SOS → Palabras A1 → Verbos (de arriba hacia abajo) → Historias del nivel → Batalla de velocidad como examen.</p></div>
+ <div class="card"><b>💾 Mi progreso — copia de seguridad</b>
+  <p>Su avance vive solo en este teléfono. Las actualizaciones de la app NO lo borran.
+  Pero si cambia de teléfono o borra los datos del navegador, se pierde — guarde una copia de vez en cuando:</p>
+  <div class="row"><button class="b p" onclick="expProg()">⬇️ Guardar copia</button>
+  <button class="b" onclick="document.getElementById('impFile').click()">📂 Restaurar copia</button></div>
+  <input type="file" id="impFile" accept=".json,application/json" style="display:none" onchange="impProg(this.files[0])"></div>
  <div class="card"><b>🔒 Privacidad</b><p>Todo queda en este teléfono. No se envía nada a internet.</p></div>`}
+window.expProg=()=>{try{
+ const blob=new Blob([localStorage.getItem('ides_state')||'{}'],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ const d=new Date();a.download='mi_progreso_ingles_'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+'.json';
+ document.body.appendChild(a);a.click();a.remove();
+ alert('✅ Copia guardada en Descargas. Guárdela donde no se pierda (correo, USB…).');
+}catch(e){alert('No se pudo guardar la copia.')}};
+window.impProg=(file)=>{if(!file)return;
+ const r=new FileReader();
+ r.onload=()=>{try{const j=JSON.parse(r.result);
+  if(!j||typeof j!=='object'||!('srs' in j||'level' in j))throw 0;
+  localStorage.setItem('ides_state',JSON.stringify(j));
+  alert('✅ Progreso restaurado. La app se reiniciará.');location.reload();
+ }catch(e){alert('⚠️ Ese archivo no es una copia válida del progreso.')}};
+ r.readAsText(file)};
 // ================= NÚCLEO: SRS — el repaso es aprendizaje =================
 const DAYMS=864e5, dayNum=()=>Math.floor(Date.now()/DAYMS);
 const IV=[0,1,3,7,30]; // cajas: hoy→1d→3d→1sem→1mes
@@ -1179,9 +1356,17 @@ function qSound(p){const target=Math.random()<0.5?p.a:p.b;
   opts:shuf([{label:p.a+' — '+p.ga,ok:target===p.a},{label:p.b+' — '+p.gb,ok:target===p.b}]),
   key:'sn|'+p.a+'/'+p.b,bucket:'sonidos',tag:'pronunciación',say:target,
   sayPr:{t:target,l:'en'},review:{pair:p,target}}}
+function qSOSX(it){it=it||rnd(SOSX);
+ const dis=shuf(SOSX.filter(x=>x.en!==it.en&&x.cat===it.cat));
+ const more=shuf(SOSX.filter(x=>x.en!==it.en&&x.cat!==it.cat));
+ const d3=[...dis.slice(0,2),...more].slice(0,3);
+ return{pr:`<p class="muted">${esc(it.cat)} — ¿cómo se dice?</p><p class="bigword es" style="font-size:24px">${esc(it.es)} ${spkBtn(it.es,'es')}</p>`,
+  opts:shuf([{label:it.en,ok:true},...d3.map(d=>({label:d.en,ok:false}))]),
+  key:'sx|'+it.en,bucket:'sos',tag:'SOS',say:it.en}}
 function qFromKey(key){const[t,...rest]=key.split('|');const id=rest.join('|');
  try{
   if(t==='v'){const w=VOCAB.find(v=>v.en===id);return w?qVocab(w):null}
+  if(t==='sx'){const it=SOSX.find(x=>x.en===id);return it?qSOSX(it):null}
   if(t==='lv'){const it=LVC.find(x=>x.v+' '+x.n===id);return it?qLVC(it):null}
   if(t==='be'){const it=BE_DRILL.find(x=>x.es===id);return it?qBe(it):null}
   if(t==='wq'){const it=WANT_DRILL.find(x=>x.es===id);return it?qWant(it):null}
@@ -1229,12 +1414,12 @@ window.gqAns=(btn,ok)=>{if(GQ.locked)return;GQ.locked=true;
   const p=q.review.pair,t=q.review.target;
   document.getElementById('gqFb').innerHTML=`
    <div class="note">${ok?'✅':'❌'} Sonó: <b>${esc(t)}</b> — vuelva a escuchar la diferencia:</div>
-   <div class="row">
+   <div class="sndcmp">
     <button class="b ${t===p.a?'g':''}" onclick="spk('${esc(p.a)}','en',0.85)">🔊 ${esc(p.a)} — ${esc(p.ga)}${t===p.a?' ✓':''}</button>
     <button class="b ${t===p.b?'g':''}" onclick="spk('${esc(p.b)}','en',0.85)">🔊 ${esc(p.b)} — ${esc(p.gb)}${t===p.b?' ✓':''}</button>
-    <button class="b" onclick="spk('${esc(p.a)}... ${esc(p.b)}.','en',0.8)">🔊 los dos</button>
+    <button class="b" onclick="spk('${esc(p.a)}... ${esc(p.b)}.','en',0.8)">🔊 los dos, seguidos</button>
    </div>
-   <div class="row"><button class="b p big" onclick="gqNext()">Siguiente →</button></div>`;
+   <button class="b p big" style="margin-top:14px" onclick="gqNext()">Siguiente →</button>`;
   window.gqNext=next;spk(t,'en',0.85);return}
  if(q.say)speakThen(q.say,'en',null,ok?700:1400,next);else setTimeout(next,ok?700:1600)};
 // ================= MAPA de comprensión (vector, no nota) =================
@@ -1316,8 +1501,8 @@ function sonidosHome(){title('🔉 Sonidos');
  <button class="spk sm" onclick="spk('Va a escuchar una palabra. Dos opciones se parecen mucho. Trucos: para la be y la uve, los dientes tocan el labio. Para la zeta, la garganta vibra: ponga la mano en el cuello. Para la hache, un soplo suave.','es')">🔊</button></p>
  <div class="card"><b>Trucos con la mano</b>
   <p style="font-size:16px">🖐️ <b>v</b>: dientes en el labio (very ≠ berry) · ✋ <b>z</b>: mano al cuello, vibra (prize) ·
-  💨 <b>p/h</b>: soplo en la palma · 👄 <b>sh</b> sopla largo, <b>ch</b> explota</p></div>
- <button class="b p big" onclick="sndRound()">👂 Empezar — 12 pares</button>`}
+  💨 <b>p/h</b>: soplo en la palma · 👄 <b>sh</b> sopla largo, <b>ch</b> explota · 👅 <b>th</b>: lengua entre los dientes (three ≠ tree)</p></div>
+ <button class="b p big" onclick="sndRound()">👂 Empezar — 12 de ${MINPAIRS.length} pares</button>`}
 window.sndRound=()=>{runQuiz(shuf(MINPAIRS).slice(0,12).map(qSound),'🔉 ¿Cuál escuchó?',r=>{
  const hint=zpdHint('sonidos');
  main.innerHTML=`<div class="card center"><p style="font-size:46px">${r.ok>=10?'🌟':r.ok>=8?'💪':'👂'}</p>
@@ -1468,7 +1653,24 @@ function noticeHL(html){if(!ST.notice)return html;
 
 // ================= inicio =================
 go(home);
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+const _sh=document.getElementById('slowHdr');if(_sh)_sh.classList.toggle('on',!!ST.slow);
+// 새 버전 알림: 감지되면 토스트 → 탭하면 즉시 적용
+function showUpd(){if(document.getElementById('updbar'))return;
+ const d=document.createElement('div');d.id='updbar';d.className='updbar';
+ d.innerHTML='🎁 Nueva versión lista — <b>toque aquí</b>';
+ d.onclick=()=>location.reload();
+ document.body.appendChild(d)}
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('sw.js').then(reg=>{
+  reg.addEventListener('updatefound',()=>{const nw=reg.installing;if(!nw)return;
+   nw.addEventListener('statechange',()=>{
+    if(nw.state==='activated'&&navigator.serviceWorker.controller)showUpd()})});
+ }).catch(()=>{});}
+// Voz HD 예열 (홈 표시 이후 백그라운드)
+setTimeout(()=>{hdWarm()},1200);
+// 저장공간 영구 보호 요청: 브라우저가 공간 부족 시 progress를 지우지 못하게
+try{if(navigator.storage&&navigator.storage.persist)
+ navigator.storage.persisted().then(p=>{if(!p)navigator.storage.persist()})}catch(e){}
 </script>
 </body>
 </html>

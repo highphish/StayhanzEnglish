@@ -1454,3 +1454,83 @@ SOS_SIT.push(
  {cue:"En la iglesia alguien le pregunta algo y no entendió.",card:3},
  {cue:"Necesita revisar su papel antes de responder.",card:7},
  {cue:"El vecino nuevo le habla rápido en inglés.",card:8});
+// ===== SOS 확장팩: el botiquín grande (el kit de 8 = reflejo; esto = caja completa) =====
+const SOSX=[
+ // entender mejor
+ {cat:"👂 Entender mejor",en:"Can you say it in other words?",es:"¿Puede decirlo con otras palabras?"},
+ {cat:"👂 Entender mejor",en:"Did you say 'fifteen' or 'fifty'?",es:"¿Dijo 'fifteen' o 'fifty'?"},
+ {cat:"👂 Entender mejor",en:"Letter by letter, please.",es:"Letra por letra, por favor."},
+ {cat:"👂 Entender mejor",en:"Is that with B or with V?",es:"¿Es con B o con V?"},
+ {cat:"👂 Entender mejor",en:"Almost — say it one more time.",es:"Casi — dígalo una vez más."},
+ {cat:"👂 Entender mejor",en:"I understand a little, but not all.",es:"Entiendo un poco, pero no todo."},
+ // pedir ayuda
+ {cat:"🆘 Pedir ayuda",en:"Can you help me, please?",es:"¿Me puede ayudar, por favor?"},
+ {cat:"🆘 Pedir ayuda",en:"I have a question.",es:"Tengo una pregunta."},
+ {cat:"🆘 Pedir ayuda",en:"Where can I find this?",es:"¿Dónde puedo encontrar esto?"},
+ {cat:"🆘 Pedir ayuda",en:"Who can I ask?",es:"¿A quién le puedo preguntar?"},
+ {cat:"🆘 Pedir ayuda",en:"Can you show me how?",es:"¿Me puede mostrar cómo?"},
+ {cat:"🆘 Pedir ayuda",en:"Is this the right line?",es:"¿Esta es la fila correcta?"},
+ // tiempo
+ {cat:"🕐 Ganar tiempo",en:"One second, I'm looking for it.",es:"Un segundo, lo estoy buscando."},
+ {cat:"🕐 Ganar tiempo",en:"I'm almost ready.",es:"Ya casi estoy lista."},
+ {cat:"🕐 Ganar tiempo",en:"Give me a minute, please.",es:"Déme un minuto, por favor."},
+ {cat:"🕐 Ganar tiempo",en:"Let me think.",es:"Déjeme pensar."},
+ {cat:"🕐 Ganar tiempo",en:"I'll check and tell you.",es:"Voy a revisar y le digo."},
+ // cortesía
+ {cat:"🙏 Cortesía",en:"Excuse me.",es:"Disculpe."},
+ {cat:"🙏 Cortesía",en:"Sorry to bother you.",es:"Perdón por molestarle."},
+ {cat:"🙏 Cortesía",en:"Thank you so much!",es:"¡Muchísimas gracias!"},
+ {cat:"🙏 Cortesía",en:"No problem.",es:"No hay problema."},
+ {cat:"🙏 Cortesía",en:"Of course.",es:"Claro que sí."},
+ {cat:"🙏 Cortesía",en:"I'm sorry, I can't today.",es:"Lo siento, hoy no puedo."},
+ {cat:"🙏 Cortesía",en:"Have a good day!",es:"¡Que tenga buen día!"},
+ // teléfono
+ {cat:"📞 Teléfono",en:"Can you hear me?",es:"¿Me escucha?"},
+ {cat:"📞 Teléfono",en:"The signal is bad.",es:"La señal está mala."},
+ {cat:"📞 Teléfono",en:"I'll call you back.",es:"Le devuelvo la llamada."},
+ {cat:"📞 Teléfono",en:"Sorry, wrong number.",es:"Perdón, número equivocado."},
+ {cat:"📞 Teléfono",en:"Can you send it by text?",es:"¿Me lo manda por mensaje?"},
+ // emergencia real
+ {cat:"🚨 Emergencia",en:"Help!",es:"¡Auxilio!"},
+ {cat:"🚨 Emergencia",en:"It's an emergency!",es:"¡Es una emergencia!"},
+ {cat:"🚨 Emergencia",en:"I need a doctor, please!",es:"¡Necesito un doctor, por favor!"},
+ {cat:"🚨 Emergencia",en:"Call the police, please!",es:"¡Llame a la policía, por favor!"},
+ {cat:"🚨 Emergencia",en:"I'm lost.",es:"Estoy perdida."},
+ {cat:"🚨 Emergencia",en:"I lost my bag.",es:"Perdí mi bolsa."},
+ {cat:"🚨 Emergencia",en:"My child is sick.",es:"Mi hijo está enfermo."},
+ // mantener la conversación
+ {cat:"💬 Seguir hablando",en:"Really?",es:"¿De verdad?"},
+ {cat:"💬 Seguir hablando",en:"That's great!",es:"¡Qué bien!"},
+ {cat:"💬 Seguir hablando",en:"I see.",es:"Ya veo."},
+ {cat:"💬 Seguir hablando",en:"And you? What do you think?",es:"¿Y usted? ¿Qué piensa?"},
+ {cat:"💬 Seguir hablando",en:"Can you give me an example?",es:"¿Me da un ejemplo?"},
+ {cat:"💬 Seguir hablando",en:"For example?",es:"¿Por ejemplo?"}
+];
+// Sonidos 확장: th(d/t/s 대비)·a/ʌ·o/ou·n-ng·어말 d/t 등 +26쌍
+MINPAIRS.push(
+ {a:"hat",b:"hut",ga:"sombrero",gb:"cabaña",tip:"a abierta vs a cerrada"},
+ {a:"ran",b:"run",ga:"corrió",gb:"correr",tip:"a abierta vs a cerrada"},
+ {a:"bag",b:"bug",ga:"bolsa",gb:"bicho",tip:"a abierta vs a cerrada"},
+ {a:"match",b:"much",ga:"fósforo",gb:"mucho",tip:"a abierta vs a cerrada"},
+ {a:"law",b:"low",ga:"ley",gb:"bajo",tip:"o plana vs ou"},
+ {a:"bought",b:"boat",ga:"compró",gb:"barco",tip:"o plana vs ou"},
+ {a:"caught",b:"coat",ga:"atrapó",gb:"abrigo",tip:"o plana vs ou"},
+ {a:"walk",b:"woke",ga:"caminar",gb:"despertó",tip:"o plana vs ou"},
+ {a:"know",b:"now",ga:"saber",gb:"ahora",tip:"ou vs au"},
+ {a:"day",b:"they",ga:"día",gb:"ellos",tip:"d vs th suave — lengua entre dientes"},
+ {a:"dare",b:"there",ga:"atreverse",gb:"allí",tip:"d vs th suave"},
+ {a:"tree",b:"three",ga:"árbol",gb:"tres",tip:"t vs th — sople entre dientes"},
+ {a:"tin",b:"thin",ga:"lata",gb:"delgado",tip:"t vs th"},
+ {a:"taught",b:"thought",ga:"enseñó",gb:"pensó",tip:"t vs th"},
+ {a:"boat",b:"both",ga:"barco",gb:"ambos",tip:"t vs th al final"},
+ {a:"sink",b:"think",ga:"lavabo",gb:"pensar",tip:"s vs th"},
+ {a:"sing",b:"thing",ga:"cantar",gb:"cosa",tip:"s vs th"},
+ {a:"mouse",b:"mouth",ga:"ratón",gb:"boca",tip:"s vs th al final"},
+ {a:"pass",b:"path",ga:"pasar",gb:"camino",tip:"s vs th al final"},
+ {a:"cash",b:"catch",ga:"efectivo",gb:"atrapar",tip:"sh sopla, ch explota"},
+ {a:"share",b:"chair",ga:"compartir",gb:"silla",tip:"sh sopla, ch explota"},
+ {a:"sin",b:"sing",ga:"pecado",gb:"cantar",tip:"n vs ng — nariz, atrás"},
+ {a:"ban",b:"bang",ga:"prohibir",gb:"golpe",tip:"n vs ng"},
+ {a:"card",b:"cart",ga:"tarjeta",gb:"carreta",tip:"d vs t al final"},
+ {a:"send",b:"sent",ga:"mandar",gb:"mandó",tip:"d vs t al final"},
+ {a:"jam",b:"yam",ga:"mermelada",gb:"camote",tip:"j fuerte vs y suave"});
