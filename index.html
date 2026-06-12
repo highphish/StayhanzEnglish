@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a5fb4">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Inglés desde tu español</title>
+<style>
+:root{
+  --bg:#f7f5f0; --card:#ffffff; --ink:#1c1b19; --muted:#6b675f;
+  --brand:#1a5fb4; --brand2:#15803d; --warn:#b45309; --bad:#b91c1c; --good:#15803d;
+  --quien:#1d4ed8; --accion:#dc2626; --que:#7c3aed; --cuando:#15803d;
+  --line:#e2ddd2; --r:18px; --sh:0 2px 10px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* 눌림 피드백: 기능 있는 모든 요소 — 누르면 줄고 어두워진다 (CSS만, 고사양 불필요) */
+button,.litem,.mbtn,.opt,.sesbtn,.nextact,.lt,.lv,.chip,.dot,select{transition:transform .07s ease,filter .07s ease}
+button:active,.litem:active,.mbtn:active,.opt:active,.sesbtn:active,.nextact:active,.lt:active,.lv:active,select:active{transform:scale(.95);filter:brightness(.88)}
+button:not(:disabled),.litem,.mbtn,.opt,.sesbtn,.nextact{cursor:pointer}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",sans-serif;font-size:18px;line-height:1.65;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px}
+header h1{font-size:18px;margin:0;flex:1;font-weight:800}
+header .streak{font-size:16px;font-weight:700;color:var(--warn);white-space:nowrap}
+.back{border:none;background:#eee9df;border-radius:12px;font-size:22px;padding:6px 14px;cursor:pointer}
+main{max-width:min(94vw,760px);margin:0 auto;padding:16px}
+.screen{display:none}.screen.on{display:block}
+.hometitle{text-align:center;margin:8px 0 2px;font-size:26px;font-weight:800}
+.homesub{text-align:center;color:var(--muted);margin:0 0 14px;font-size:16px}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.mbtn{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px 12px;text-align:center;cursor:pointer;transition:.1s}
+.mbtn:active{transform:scale(.97)}
+.mbtn .ico{font-size:44px;display:block;margin-bottom:6px}
+.mbtn .t{font-weight:800;font-size:19px;display:block}
+.mbtn .s{color:var(--muted);font-size:14px;display:block;margin-top:2px}
+.mbtn.wide{grid-column:1/-1}
+.levelbar{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.lv{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:8px 18px;font-size:17px;font-weight:700;cursor:pointer}
+.lv.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:22px 18px;margin:18px 0}
+.bigword{font-size:clamp(34px,9vw,54px);font-weight:800;text-align:center;line-height:1.15;margin:6px 0}
+.bigword.es{color:#0e7490}.bigword.en{color:#92400e}
+.pos{display:inline-block;background:#ede9fe;color:#5b21b6;border-radius:8px;padding:2px 10px;font-size:15px;font-weight:700;margin-left:6px;vertical-align:middle}
+.center{text-align:center}
+.muted{color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+button.b{border:none;border-radius:14px;padding:14px 20px;font-size:18px;font-weight:700;cursor:pointer;background:#eee9df;color:var(--ink)}
+button.b:active{transform:scale(.97)}
+button.b.p{background:var(--brand);color:#fff}
+button.b.g{background:var(--brand2);color:#fff}
+button.b.w{background:var(--warn);color:#fff}
+button.b.r{background:var(--bad);color:#fff}
+button.b.big{font-size:22px;padding:18px 26px;width:100%}
+button.spk{border:none;background:#dbeafe;color:#1d4ed8;border-radius:50%;width:52px;height:52px;font-size:24px;cursor:pointer;flex:none}
+button.spk.sm{width:40px;height:40px;font-size:18px}
+button.spk:active{transform:scale(.92)}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:16px;font-size:19px;font-weight:600;margin:12px 0;cursor:pointer;line-height:1.5}
+.opt.ok{border-color:var(--good);background:#dcfce7}
+.opt.no{border-color:var(--bad);background:#fee2e2}
+.progress{height:10px;background:#e7e2d8;border-radius:99px;overflow:hidden;margin:10px 0}
+.progress>div{height:100%;background:var(--brand);border-radius:99px;transition:.3s}
+.frame{display:flex;gap:10px;row-gap:16px;flex-wrap:wrap;justify-content:center;font-size:24px;font-weight:800;margin:16px 0;line-height:1.5}
+.fp{padding:4px 8px;border-radius:8px}
+.fp.quien{color:var(--quien);border-bottom:4px solid var(--quien)}
+.fp.accion{color:var(--accion);border-bottom:4px double var(--accion)}
+.fp.que{color:var(--que);border-bottom:4px dotted var(--que)}
+.fp.cuando{color:var(--cuando);border-bottom:4px solid var(--cuando);border-bottom-style:wavy;text-decoration:underline wavy var(--cuando);border-bottom:none}
+.legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:14px;margin:6px 0}
+.legend span{padding:2px 8px;border-radius:6px;font-weight:700}
+.tag{display:inline-block;border-radius:8px;padding:2px 10px;font-size:14px;font-weight:800}
+.tag.safe{background:#dcfce7;color:#15803d}.tag.split{background:#fef3c7;color:#b45309}
+.tag.trap{background:#fee2e2;color:#b91c1c}.tag.relief{background:#dbeafe;color:#1d4ed8}.tag.new{background:#ede9fe;color:#6d28d9}
+.list{display:flex;flex-direction:column;gap:14px}
+.litem{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.litem .ico{font-size:30px;flex:none}
+.litem .tx{flex:1}.litem .tx b{font-size:18px}.litem .tx small{color:var(--muted);display:block}
+.timerbig{font-size:40px;font-weight:800;text-align:center;color:var(--brand)}
+.gesture{background:#fff7ed;border:1px dashed var(--warn);border-radius:12px;padding:8px 12px;font-size:16px;margin-top:8px}
+.sospic{width:112px;height:112px;margin:0 auto;background:#eff6ff;border-radius:24px;padding:14px}
+.sospic.sm{width:40px;height:40px;margin:0;flex:none;border-radius:10px;padding:5px}
+.sospic svg{width:100%;height:100%;display:block}
+.opt.sositem{display:flex;align-items:center;gap:10px}
+.storyline{margin:14px 0;padding:14px;border-radius:12px;background:#f4f1ea;display:flex;gap:12px;align-items:flex-start}
+.storyline.hide .txt{filter:blur(6px)}
+.storyline .txt{flex:1;font-size:19px;line-height:1.65}
+.storyline .es{color:var(--muted);font-size:16px;display:block;margin-top:6px;line-height:1.5}
+.trap{background:#fef08a;border-radius:6px;padding:0 4px;cursor:pointer;font-weight:700}
+.bline{margin:12px 0;padding:12px 14px;border-radius:12px;background:#f4f1ea;display:flex;gap:10px;align-items:flex-start;cursor:pointer;border-left:5px solid transparent}
+.bline .n{color:var(--muted);font-size:14px;min-width:22px;text-align:right;padding-top:4px}
+.bline .txt{flex:1;font-size:20px;line-height:1.65}
+.bline .es{color:var(--muted);font-size:16px;display:block;margin-top:4px}
+.bline.cur{background:#fef3c7;border-left-color:var(--warn)}
+.bline.mA{border-left-color:var(--brand);background:#eff6ff}
+.bline.mB{border-left-color:var(--brand2);background:#f0fdf4}
+.readbar{position:sticky;top:62px;z-index:15;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:8px}
+.readbar select{font-size:15px;padding:8px;border-radius:10px;border:1px solid var(--line);max-width:200px}
+.rate{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:15px;font-weight:700;cursor:pointer}
+.rate.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.ratewrap{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;font-size:18px}
+.ratewrap b{min-width:52px;font-size:15px;color:var(--brand)}
+input[type=range]{flex:1;height:34px;accent-color:var(--brand);cursor:pointer;min-width:90px}
+.recbar{display:flex;gap:10px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.score{font-size:30px;font-weight:800;text-align:center}
+.note{background:#eff6ff;border-left:5px solid var(--brand);border-radius:8px;padding:10px 14px;font-size:16px;margin:10px 0}
+.note.w{background:#fff7ed;border-color:var(--warn)}
+.offline-pill{font-size:13px;background:#dcfce7;color:#15803d;border-radius:99px;padding:3px 10px;font-weight:700}
+.offline-pill.off{background:#fee2e2;color:#b91c1c}
+.fbox{background:#fee2e2;border-radius:12px;padding:12px;margin:8px 0}
+.fbox b{color:var(--bad)}
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+footer button{flex:1 1 0;max-width:170px;border:none;background:none;padding:10px 4px 12px;font-size:12px;color:var(--muted);cursor:pointer}
+footer button .fi{display:block;font-size:24px}
+footer button.on{color:var(--brand);font-weight:800}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+/* sesión de hoy */
+.sesbtn{background:linear-gradient(135deg,#1a5fb4,#15803d);color:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:18px;text-align:center;cursor:pointer;margin:12px 0}
+.sesbtn .t{font-size:22px;font-weight:800}.sesbtn .s{font-size:15px;opacity:.9}
+.dots{display:flex;gap:6px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.dot{padding:6px 10px;border-radius:99px;font-size:13px;font-weight:700;background:#e7e2d8;color:var(--muted)}
+.dot.cur{background:var(--brand);color:#fff}.dot.done{background:#dcfce7;color:#15803d}
+.sline{display:flex;align-items:center;gap:3px;justify-content:center;margin:2px 0 6px;white-space:nowrap}
+.sstep{opacity:.3;font-size:15px;line-height:1}.sstep.cur{opacity:1;font-size:20px}.sstep.done{opacity:.75}
+.sarrow{opacity:.3;font-size:10px}.scur{margin-left:7px;font-size:12px;color:var(--muted);font-weight:700}
+/* 폰 화면 한 화면 풀이: 세로가 짧으면 여백·글자 압축 */
+@media(max-height:760px){
+ main{padding:10px 12px}body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+ .card{padding:12px 14px;margin:8px 0}
+ .opt{padding:10px 12px;margin:6px 0;font-size:17px;border-radius:12px}
+ .bigword{font-size:clamp(22px,6.5vw,32px)!important;margin:2px 0}
+ .progress{margin:4px 0;height:8px}
+ .card .muted{font-size:14px}
+ .note{padding:7px 10px;font-size:14px;margin:6px 0}
+ .menu{gap:8px}.mbtn{padding:12px 8px}.mbtn .ico{font-size:32px;margin-bottom:2px}
+ .sospic{width:84px;height:84px;padding:10px}
+ button.b.big{padding:13px 18px;font-size:19px}}
+/* mapa de comprensión */
+.gauge{display:flex;align-items:center;gap:10px;margin:8px 0}
+.gauge .gl{min-width:118px;font-size:15px;font-weight:700}
+.gauge .gb{flex:1;height:12px;background:#e7e2d8;border-radius:99px;overflow:hidden}
+.gauge .gb>div{height:100%;border-radius:99px}
+.gauge .gp{min-width:42px;text-align:right;font-size:14px;color:var(--muted)}
+.nextact{background:#eff6ff;border:2px solid var(--brand);border-radius:14px;padding:14px;display:flex;align-items:center;gap:10px;cursor:pointer;margin:10px 0}
+/* reflexión */
+.lights{display:flex;gap:8px;justify-content:center}
+.lt{font-size:24px;padding:6px 10px;border-radius:12px;border:2px solid transparent;cursor:pointer;background:#f4f1ea}
+.lt.on{border-color:var(--brand);background:#eff6ff}
+input.tx,textarea.tx{width:100%;font-size:17px;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-family:inherit;margin:6px 0}
+/* noticing */
+.ntc{background:#e0f2fe;border-radius:4px;padding:0 3px;border-bottom:2px solid #0284c7}
+.planring{font-size:36px;font-weight:800;color:var(--warn);text-align:center}
+.errtag{display:inline-block;background:#fee2e2;color:#b91c1c;border-radius:8px;padding:2px 10px;font-size:14px;font-weight:700;margin:2px}
+/* 전역 정지/내 목소리 바 */
+.stopbar{position:fixed;bottom:calc(66px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:none;gap:8px;z-index:30;background:var(--card);padding:8px 10px;border-radius:99px;box-shadow:0 4px 18px rgba(0,0,0,.18);border:1px solid var(--line);align-items:center}
+.hdrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;flex-wrap:wrap}
+.hdrow .nm{flex:1;min-width:140px;font-weight:700}
+.hdrow .pg{font-size:14px;color:var(--brand);font-weight:800;min-width:44px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat b{font-size:26px;display:block;color:var(--brand)}
+.stat small{color:var(--muted)}
+/* ===== responsive: teléfonos pequeños → tablets ===== */
+@media(max-width:360px){body{font-size:16px}.bigword{font-size:clamp(26px,8vw,38px)}
+ button.b{padding:12px 14px;font-size:16px}.mbtn .ico{font-size:36px}.frame{font-size:20px}}
+@media(min-width:700px){body{font-size:19px}main{max-width:780px;padding:24px}
+ .storyline{padding:16px 18px}.card{padding:26px 24px}
+ .list{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+ .list .litem{margin:0}}
+@media(min-width:1000px){body{font-size:20px}main{max-width:880px}
+ .menu{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+ .bline .txt{font-size:22px}.storyline .txt{font-size:21px}
+ header{padding:12px 24px}header h1{font-size:20px}}
+@media(orientation:landscape) and (max-height:480px){
+ body{padding-bottom:70px}.card{padding:14px}.bigword{font-size:clamp(24px,5vh,36px)}
+ footer button .fi{display:inline;font-size:18px;margin-right:4px}}
+</style>
+</head>
+<body>
+<header>
+  <button class="back" id="btnBack" style="display:none">←</button>
+  <h1 id="hTitle">Inglés desde tu español</h1>
+  <span class="offline-pill" id="netPill">📴 sin internet ✓</span>
+  <span class="streak" id="streak">🔥0</span>
+</header>
+<main id="main"></main>
+<footer>
+  <button data-nav="home" class="on"><span class="fi">🏠</span>Inicio</button>
+  <button data-nav="vocab"><span class="fi">📚</span>Palabras</button>
+  <button data-nav="verbs"><span class="fi">⚙️</span>Verbos</button>
+  <button data-nav="sos"><span class="fi">🆘</span>SOS</button>
+  <button data-nav="stories"><span class="fi">🎧</span>Historias</button>
+</footer>
+<script src="data.js"></script>
+<script>
+"use strict";
+// ================= util =================
+const $=s=>document.querySelector(s), main=document.getElementById('main');
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// ================= estado =================
+const ST=JSON.parse(localStorage.getItem('ides_state')||'{}');
+ST.level=ST.level||'A1'; ST.scores=ST.scores||{}; ST.seen=ST.seen||{}; ST.bookPos=ST.bookPos||{};
+ST.srs=ST.srs||{};      // memoria de repaso: {clave:{b caja,d vence,n vistos,w errores,fs racha,t tag,fx vencido}}
+ST.acc=ST.acc||{};      // precisión por área (últimos 20)
+ST.reflect=ST.reflect||[]; // diario: luces, victorias, intención
+ST.idc=ST.idc||0;       // contador de identidad: sesiones completadas
+ST.etapa=ST.etapa||0;ST.etapaSes=ST.etapaSes||0; // posición en Mi camino (24 etapas)
+const RD={on:false,a:null,b:null,sel:0}; // lector de cuentos
+const SES={on:false,stage:-1,keys:[],primeAcc:null,retAcc:null,t0:0,breakShown:false}; // Sesión de hoy
+function save(){localStorage.setItem('ides_state',JSON.stringify(ST))}
+(function streak(){const t=new Date().toDateString();
+ if(ST.lastDay!==t){const y=new Date(Date.now()-864e5).toDateString();
+  ST.streak=(ST.lastDay===y)?(ST.streak||0)+1:1; ST.lastDay=t; save();}
+ $('#streak').textContent='🔥'+(ST.streak||1);})();
+// ================= red =================
+function netUI(){const on=navigator.onLine,p=$('#netPill');
+ p.textContent=on?'📶 en línea':'📴 sin internet ✓';p.className='offline-pill'+(on?' off':'');}
+addEventListener('online',netUI);addEventListener('offline',netUI);netUI();
+// ================= voz (TTS) =================
+let VOICES=[];function loadV(){VOICES=speechSynthesis.getVoices()}
+loadV();speechSynthesis.onvoiceschanged=loadV;
+// puntuación de calidad: voces "Natural/Neural/Premium/Enhanced" primero
+const FEM_RE=/samantha|ava|allison|susan|zira|aria|jenny|joanna|salli|kendra|kimberly|ivy|karen|moira|tessa|serena|catherine|nicky|sara|emma|libby|sonia|natasha|female|woman/;
+const MASC_RE=/daniel|tom|alex|fred|david|mark|guy|ryan|christopher|eric|brian|justin|aaron|arthur|oliver|james|male(?!ena)|man\b/;
+function vScore(v,langPref){let s=0;const n=v.name.toLowerCase(),l=v.lang.replace('_','-').toLowerCase();
+ if(l.startsWith(langPref))s+=40;else if(l.startsWith(langPref.slice(0,2)))s+=20;else return -1;
+ if(/natural|neural|premium|enhanced|plus/.test(n))s+=30;
+ if(/google|microsoft online/.test(n))s+=12;
+ if(FEM_RE.test(n))s+=10;else if(MASC_RE.test(n))s+=6; // default: mejor voz femenina en-US
+ if(/compact|espeak|eloquence|grandpa|grandma|bells|zarvox|trinoids|whisper|bad news|good news|bubbles|cellos|organ|albert|jester|wobble/.test(n))s-=40;
+ if(v.localService)s+=3;
+ return s}
+function bestVoice(lang){const pref=lang==='en'?'en-us':'es-mx';
+ let best=null,bs=-1;
+ for(const v of VOICES){const s=vScore(v,pref);if(s>bs){bs=s;best=v}}
+ if(!best&&lang==='es'){for(const v of VOICES){if(v.lang.toLowerCase().startsWith('es')){best=v;break}}}
+ return best}
+function pickVoice(lang){
+ const want=lang==='en'?ST.voiceEN:ST.voiceES;
+ if(want){const v=VOICES.find(v=>v.name===want);if(v)return v}
+ return bestVoice(lang)}
+// ===== ✨ Voz HD (Piper neuronal, embebida — modelos se bajan 1 vez y quedan offline en OPFS) =====
+const HD={lib:null,stored:[],audio:null,res:null,cache:new Map(),sizes:{}};
+const HD_VOICES=[
+ {id:'en_US-hfc_female-medium',l:'en',g:'👩',name:'Heather · inglés EE.UU.'},
+ {id:'en_US-amy-medium',l:'en',g:'👩',name:'Amy · inglés EE.UU.'},
+ {id:'en_US-hfc_male-medium',l:'en',g:'👨',name:'Henry · inglés EE.UU.'},
+ {id:'es_MX-claude-high',l:'es',g:'👩',name:'Claudia · español México'},
+ {id:'es_ES-sharvard-medium',l:'es',g:'👩',name:'Sara · español España'},
+ {id:'es_MX-ald-medium',l:'es',g:'👨',name:'Aldo · español México'}];
+async function hdInit(){if(HD.lib)return true;
+ try{
+  if(!globalThis.ort)await new Promise((res,rej)=>{const s=document.createElement('script');
+   s.src='hd/ort.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+  HD.lib=await import('./hd/vits-web.js');
+  HD.stored=await HD.lib.stored();
+  return true}catch(e){console.warn('HD init falló',e);return false}}
+function hdVoiceFor(lang){if(!ST.hd||!HD.lib)return null;
+ const want=lang==='en'?ST.hdVoiceEN:ST.hdVoiceES;
+ if(want&&HD.stored.includes(want))return want;
+ const c=HD_VOICES.find(v=>v.l===lang&&HD.stored.includes(v.id));return c?c.id:null}
+const hdOK=lang=>!!hdVoiceFor(lang);
+function stopHdAudio(){if(HD.audio){try{HD.audio.pause()}catch(e){}HD.audio=null}
+ if(HD.res){const r=HD.res;HD.res=null;r(false)}}
+async function hdSpeak(text,lang,rate,vid){vid=vid||hdVoiceFor(lang);if(!vid||!HD.lib)return false;
+ try{const key=vid+'|'+text;let blob=HD.cache.get(key);
+  if(!blob){blob=await HD.lib.predict({text,voiceId:vid});
+   HD.cache.set(key,blob);if(HD.cache.size>150)HD.cache.delete(HD.cache.keys().next().value)}
+  return await new Promise(res=>{stopHdAudio();HD.res=res;
+   const a=new Audio(URL.createObjectURL(blob));HD.audio=a;
+   a.playbackRate=Math.max(0.5,Math.min(2,(rate||ST.rate||0.95)/0.95));
+   a.onended=()=>{if(HD.res===res)HD.res=null;res(true)};
+   a.onerror=()=>{if(HD.res===res)HD.res=null;res(false)};
+   a.play().catch(()=>{if(HD.res===res)HD.res=null;res(false)})})
+ }catch(e){console.warn('HD predict',e);return false}}
+// ===== parada universal + mi voz =====
+window.stopAll=()=>{try{speechSynthesis.cancel()}catch(e){}
+ RD.on=false;if(typeof playing!=='undefined')playing=false;
+ if(typeof INT!=='undefined'&&INT)INT.on=false;
+ stopHdAudio();stopBar(false)};
+function stopBar(show){let b=document.getElementById('stopbar');
+ if(!b){b=document.createElement('div');b.id='stopbar';b.className='stopbar';
+  b.innerHTML=`<button class="b r" onclick="stopAll()">⏹ Parar</button>
+   <button class="b" id="sbMiVoz" onclick="playMe()">▶️ Mi voz</button>`;
+  document.body.appendChild(b)}
+ const mv=document.getElementById('sbMiVoz');if(mv)mv.style.display=lastAudio?'':'none';
+ b.style.display=show?'flex':'none'}
+function speak(text,lang,rate){try{speechSynthesis.cancel()}catch(e){}
+ stopHdAudio();
+ if(hdOK(lang)){hdSpeak(text,lang,rate);return}
+ try{const u=new SpeechSynthesisUtterance(text);u.lang=lang==='en'?'en-US':'es-MX';
+ const v=pickVoice(lang);if(v)u.voice=v;u.rate=rate||ST.rate||0.92;speechSynthesis.speak(u);}catch(e){}}
+window.spk=(t,l,r)=>speak(t,l,r);
+// habla y ESPERA a que termine + pausa antes de seguir (evita cortes)
+function speakThen(text,lang,rate,pause,cb){
+ if(hdOK(lang)){try{speechSynthesis.cancel()}catch(e){}
+  let done=false;const fin=()=>{if(done)return;done=true;setTimeout(cb,pause)};
+  hdSpeak(text,lang,rate).then(fin).catch(fin);
+  setTimeout(fin,6000+text.length*120);return}
+ try{speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=lang==='en'?'en-US':'es-MX';
+  const v=pickVoice(lang);if(v)u.voice=v;u.rate=rate||0.92;
+  let done=false;const fin=()=>{if(done)return;done=true;setTimeout(cb,pause)};
+  u.onend=fin;u.onerror=fin;
+  setTimeout(fin,2000+text.length*100); // red de seguridad si onend no llega
+  speechSynthesis.speak(u);
+ }catch(e){setTimeout(cb,pause)}}
+// ================= grabadora =================
+let mediaRec=null,chunks=[],lastAudio=null,recOn=false;
+async function toggleRec(btn,target){ 
+ if(recOn){mediaRec.stop();recOn=false;btn.textContent='🎙️ Grabar';btn.classList.remove('r');return}
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:true});
+  mediaRec=new MediaRecorder(st);chunks=[];
+  mediaRec.ondataavailable=e=>chunks.push(e.data);
+  mediaRec.onstop=()=>{lastAudio=URL.createObjectURL(new Blob(chunks,{type:mediaRec.mimeType||'audio/mp4'}));
+   st.getTracks().forEach(t=>t.stop());stopBar(true);};
+  mediaRec.start();recOn=true;btn.textContent='⏹️ Parar';btn.classList.add('r');
+ }catch(e){alert('Permita el micrófono para practicar su voz. / 마이크 권한을 허용하세요.')}}
+function playMe(){if(lastAudio){try{speechSynthesis.cancel()}catch(e){}stopHdAudio();
+ new Audio(lastAudio).play().catch(()=>alert('No se pudo reproducir. Grabe de nuevo 🎙️'))}
+ else alert('Primero grabe su voz 🎙️')}
+// reconocimiento (solo con internet)
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function recogBtn(target){ if(!SR)return '';
+ return `<button class="b w" onclick="recog('${esc(target).replace(/'/g,"\\'")}',this)">🎤 Hablar y comparar</button>`}
+window.recog=(target,btn)=>{ if(!navigator.onLine){alert('Esta función necesita internet. Sin internet: grabe y compare con el oído 👂');return}
+ const r=new SR();r.lang='en-US';btn.textContent='🎤 ...escuchando';
+ r.onresult=e=>{const said=e.results[0][0].transcript;
+  const A=said.toLowerCase().replace(/[^a-z' ]/g,'').split(/\s+/),B=target.toLowerCase().replace(/[^a-z' ]/g,'').split(/\s+/);
+  const hit=B.filter(w=>A.includes(w)).length, pct=Math.round(100*hit/B.length);
+  btn.insertAdjacentHTML('afterend',`<div class="score">${pct>=80?'🌟':pct>=50?'💪':'👂'} ${pct}%<div class="muted" style="font-size:15px">Usted dijo: “${esc(said)}”</div></div>`);
+  btn.textContent='🎤 Hablar y comparar';};
+ r.onerror=()=>{btn.textContent='🎤 Hablar y comparar'};r.start();}
+function recBar(target){return `<div class="recbar">
+ <button class="spk" onclick="spk('${esc(target).replace(/'/g,"\\'")}','en',0.8)" title="lento">🐢</button>
+ <button class="spk" onclick="spk('${esc(target).replace(/'/g,"\\'")}','en',1)" title="normal">🔊</button>
+ <button class="b" onclick="toggleRec(this,'')">🎙️ Grabar</button>
+ <button class="b" onclick="playMe()">▶️ Mi voz</button>
+ ${recogBtn(target)}</div>`}
+window.toggleRec=toggleRec;window.playMe=playMe;
+// ================= router =================
+const stack=[];
+function go(fn,...args){
+ if(RD.on||(typeof INT!=='undefined'&&INT&&INT.on)||(typeof playing!=='undefined'&&playing))stopAll();
+ else stopBar(false);
+ stack.push([fn,args]);fn(...args);window.scrollTo(0,0);
+ $('#btnBack').style.display=stack.length>1?'':'none';}
+$('#btnBack').onclick=()=>{stack.pop();const[fn,args]=stack[stack.length-1];fn(...args);
+ $('#btnBack').style.display=stack.length>1?'':'none';window.scrollTo(0,0);};
+document.querySelectorAll('footer button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('footer button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ stack.length=0;go({home,vocab:vocabHome,verbs:verbsHome,sos:sosHome,stories:storiesHome}[b.dataset.nav]);});
+function title(t){$('#hTitle').textContent=t}
+function levelBar(cb){return `<div class="levelbar">${['A1','A2','B1','B2'].map(l=>
+ `<button class="lv ${ST.level===l?'on':''}" onclick="setLv('${l}')">${l}</button>`).join('')}</div>`}
+window.setLv=l=>{ST.level=l;save();const[fn,args]=stack[stack.length-1];fn(...args)};
+// ================= INICIO =================
+function home(){title('Inglés desde tu español');
+ const due=dueList().length,done=sesToday();
+ main.innerHTML=`
+ <p class="hometitle">¡Hola! 👋</p>
+ <p class="homesub">Usted ya sabe mucho inglés — está dentro de su español.<br>
+ <button class="spk sm" onclick="spk('Usted ya sabe mucho inglés. Está dentro de su español. Empiece con la sesión de hoy: veinticinco minutos, cinco pasos.','es')">🔊</button> <small>escuchar instrucciones</small></p>
+ <div class="sesbtn" onclick="${done?'':'sesStart()'}">
+  <span class="t">${done?'✅ Sesión de hoy completa':'🔄 Sesión de hoy'}</span><br>
+  <span class="s">${done?'Mañana hay más — la constancia gana':'25 min · recordar → escuchar → sacar → hablar → mirar atrás'+(due?` · 🔁 ${due} por repasar`:'')}</span></div>
+ <div class="nextact" onclick="go(caminoScr)"><span style="font-size:24px">🧭</span>
+  <div style="flex:1"><b>Etapa ${ST.etapa+1}/24 · ${esc(etapaDef().tt)}</b><br>
+  <small class="muted">Meta: ${esc(etapaDef().can)}</small></div><span>›</span></div>
+ ${levelBar()}
+ ${mapHTML()}
+ <div class="menu">
+  <div class="mbtn" onclick="go(vocabHome)"><span class="ico">📚</span><span class="t">Palabras</span><span class="s">amigos del español</span></div>
+  <div class="mbtn" onclick="go(verbsHome)"><span class="ico">⚙️</span><span class="t">Verbos</span><span class="s">comí → I ate</span></div>
+  <div class="mbtn" onclick="go(sosHome)"><span class="ico">🆘</span><span class="t">SOS</span><span class="s">¡nunca en silencio!</span></div>
+  <div class="mbtn" onclick="go(framesHome)"><span class="ico">🧩</span><span class="t">Frases listas</span><span class="s">marcos para todo</span></div>
+  <div class="mbtn" onclick="go(storiesHome)"><span class="ico">🎧</span><span class="t">Historias</span><span class="s">escuchar · repetir</span></div>
+  <div class="mbtn" onclick="go(booksHome)"><span class="ico">📖</span><span class="t">Cuentos</span><span class="s">leer y escuchar</span></div>
+  <div class="mbtn" onclick="go(sonidosHome)"><span class="ico">🔉</span><span class="t">Sonidos</span><span class="s">ship o sheep?</span></div>
+  <div class="mbtn" onclick="go(errScr)"><span class="ico">🧾</span><span class="t">Mis errores</span><span class="s">son mi mapa</span></div>
+  <div class="mbtn wide" onclick="go(helpScr)"><span class="ico">❓</span><span class="t">Ayuda</span><span class="s">instalar · sin internet · profesores</span></div>
+ </div>
+ <div class="statgrid">
+  <div class="stat"><b>🔥${ST.streak||1}</b><small>días seguidos</small></div>
+  <div class="stat"><b>🌳${ST.idc}</b><small>sesiones — persona que aprende</small></div>
+ </div>`}
+// ================= PALABRAS =================
+let flashTrack='c';
+function vocabHome(){title('📚 Palabras');
+ const amigos=VOCAB.filter(v=>v.l===ST.level&&v.t==='c').length,
+       nuevas=VOCAB.filter(v=>v.l===ST.level&&v.t==='n').length;
+ main.innerHTML=`${levelBar()}
+ <p class="center muted">Nivel ${ST.level}: <b>${amigos+nuevas}</b> palabras
+ <button class="spk sm" onclick="spk('Hay dos grupos: amigos del español, que ya casi conoce, y palabras del día a día. Escuche y repita.','es')">🔊</button></p>
+ <div class="list">
+  <div class="litem" onclick="flashTrack='c';go(flashScr,0)"><span class="ico">🤝</span><div class="tx"><b>Amigos del español</b><small>${amigos} palabras casi iguales</small></div>›</div>
+  <div class="litem" onclick="flashTrack='n';go(flashScr,0)"><span class="ico">🧱</span><div class="tx"><b>Palabras del día a día</b><small>${nuevas} esenciales</small></div>›</div>
+  <div class="litem" onclick="go(vQuiz)"><span class="ico">✅</span><div class="tx"><b>Quiz</b><small>4 opciones — ¡rápido!</small></div>›</div>
+  <div class="litem" onclick="go(ffScr,0)"><span class="ico">⚠️</span><div class="tx"><b>Falsos amigos</b><small>parecen iguales… ¡pero NO!</small></div>›</div>
+  <div class="litem" onclick="go(ffQuiz)"><span class="ico">🪤</span><div class="tx"><b>Quiz de trampas</b><small>falsos amigos</small></div>›</div>
+ </div>`}
+let flashSet=[];
+function flashScr(i){title(flashTrack==='c'?'🤝 Amigos':'🧱 Día a día');
+ if(i===0){flashSet=shuf(VOCAB.filter(v=>v.l===ST.level&&v.t===flashTrack)).slice(0,20)}
+ const w=flashSet[i];if(!w){main.innerHTML=`<div class="card center"><p style="font-size:50px">🎉</p><p><b>¡20 palabras!</b></p><button class="b p big" onclick="go(flashScr,0)">Otra ronda</button></div>`;return}
+ ST.seen[w.en]=1;save();
+ main.innerHTML=`<div class="progress"><div style="width:${i/20*100}%"></div></div>
+ <div class="card center">
+  <p class="muted">español</p>
+  <p class="bigword es">${esc(w.es)} <button class="spk" onclick="spk('${esc(w.es)}','es')">🔊</button></p>
+  <div id="rev" style="display:none">
+   <p class="muted">inglés <span class="pos">${esc(w.p)}</span></p>
+   <p class="bigword en">${esc(w.en)} <button class="spk" onclick="spk('${esc(w.en)}','en')">🔊</button></p>
+   <p class="muted">🐢 <button class="spk sm" onclick="spk('${esc(w.en)}','en',0.7)">🔊</button> escuche lento, repita en voz alta</p>
+  </div>
+  <button class="b p big" id="revBtn" onclick="document.getElementById('rev').style.display='';this.style.display='none';spk('${esc(w.en)}','en')">¿Cómo suena en inglés? 👂</button>
+ </div>
+ <div class="row"><button class="b g big" onclick="go(flashScr,${i+1})">Siguiente →</button></div>`}
+let qz=null;
+function vQuiz(){title('✅ Quiz');
+ const pool=VOCAB.filter(v=>v.l===ST.level);
+ if(!qz||qz.done){qz={i:0,ok:0,items:shuf(pool).slice(0,10)}}
+ const q=qz.items[qz.i];
+ if(!q){const r=qz.ok;qz.done=true;ST.scores['vq'+ST.level]=Math.max(ST.scores['vq'+ST.level]||0,r);save();
+  const hint=zpdHint('vocab-'+ST.level);
+  main.innerHTML=`<div class="card center"><p style="font-size:50px">${r>=8?'🌟':r>=5?'💪':'👂'}</p>
+  <p class="score">${r} / 10</p><p class="muted">${r>=8?'¡Excelente!':'Repita las tarjetas y vuelva'}</p>
+  ${hint?`<p class="note">${hint}</p>`:''}
+  <button class="b p big" onclick="qz=null;go(vQuiz)">Otra vez</button></div>`;return}
+ const opts=shuf([q,...shuf(pool.filter(x=>x!==q)).slice(0,optN('vocab-'+ST.level)-1)]);
+ main.innerHTML=`<div class="progress"><div style="width:${qz.i*10}%"></div></div>
+ <div class="card center"><p class="muted">¿Cómo se dice en inglés?</p>
+ <p class="bigword es">${esc(q.es)} <button class="spk" onclick="spk('${esc(q.es)}','es')">🔊</button></p></div>
+ ${opts.map(o=>`<button class="opt" onclick="vAns(this,${o===q})" data-en="${esc(o.en)}">${esc(o.en)} <span class="pos">${esc(o.p)}</span></button>`).join('')}`;}
+window.vAns=(btn,ok)=>{ if(qz.locked)return;qz.locked=true;
+ btn.classList.add(ok?'ok':'no');
+ const q=qz.items[qz.i];
+ gradeItem('v|'+q.en,ok,'vocabulario');track('vocab-'+q.l,ok);
+ if(ok){qz.ok++}else{document.querySelectorAll('.opt').forEach(b=>{if(b.dataset.en===q.en)b.classList.add('ok')})}
+ speakThen(q.en,'en',null,900,()=>{qz.i++;qz.locked=false;vQuiz()});};
+function ffScr(i){title('⚠️ Falsos amigos');
+ const f=FF[i];if(!f){main.innerHTML=`<div class="card center">🎉 ¡Vio todos!<button class="b p big" onclick="go(ffScr,0)">Desde el inicio</button></div>`;return}
+ main.innerHTML=`<div class="progress"><div style="width:${i/FF.length*100}%"></div></div>
+ <div class="card center">
+  <p class="bigword es" style="font-size:34px">${esc(f.es)} <button class="spk sm" onclick="spk('${esc(f.es)}','es')">🔊</button></p>
+  <p style="font-size:26px;color:var(--bad);font-weight:800">NO es “${esc(f.en)}” ❌</p>
+  <div class="fbox"><b>${esc(f.es)}</b> en inglés = <b>${esc(f.esEn)}</b> <button class="spk sm" onclick="spk('${esc(f.esEn)}','en')">🔊</button><br>
+  <b>${esc(f.en)}</b> <span class="pos">${esc(f.p)}</span> en español = <b>${esc(f.enEs)}</b> <button class="spk sm" onclick="spk('${esc(f.en)}','en')">🔊</button></div>
+ </div>
+ <div class="row"><button class="b" onclick="go(ffScr,${Math.max(0,i-1)})">←</button>
+ <span class="muted">${i+1}/${FF.length}</span>
+ <button class="b g" onclick="go(ffScr,${i+1})">Siguiente →</button></div>`}
+let fq=null;
+function ffQuiz(){title('🪤 Quiz de trampas');
+ if(!fq||fq.done)fq={i:0,ok:0,items:shuf(FF).slice(0,8)};
+ const q=fq.items[fq.i];
+ if(!q){fq.done=true;main.innerHTML=`<div class="card center"><p class="score">${fq.ok} / 8</p>
+  <button class="b p big" onclick="fq=null;go(ffQuiz)">Otra vez</button></div>`;return}
+ const opts=shuf([{t:q.esEn,ok:true},{t:q.en,ok:false},{t:rnd(FF.filter(x=>x!==q)).esEn,ok:false}]);
+ main.innerHTML=`<div class="progress"><div style="width:${fq.i/8*100}%"></div></div>
+ <div class="card center"><p class="muted">En inglés, “${esc(q.es)}” se dice…</p>
+ <p class="bigword es" style="font-size:34px">${esc(q.es)}</p></div>
+ ${opts.map(o=>`<button class="opt" onclick="ffAns(this,${o.ok})">${esc(o.t)}</button>`).join('')}
+ <p class="center muted">⚠️ una opción es la trampa</p>`;}
+window.ffAns=(btn,ok)=>{btn.classList.add(ok?'ok':'no');if(ok)fq.ok++;
+ gradeItem('f|'+fq.items[fq.i].es,ok,'falso amigo');track('ff',ok);
+ speakThen(fq.items[fq.i].esEn,'en',null,900,()=>{fq.i++;ffQuiz()});};
+// ================= VERBOS =================
+const ES_SUBJ=["yo","tú","él","ella","nosotros","ellos"];
+function esForms(v,t){const inf=v.inf,g=inf.slice(-2),st=inf.slice(0,-2),irr=v.irr||{};
+ const mk=e=>e.map(x=>st+x);
+ switch(t){
+  case'pret':return irr.pret||(g==='ar'?mk(['é','aste','ó','amos','aron']):mk(['í','iste','ió','imos','ieron']));
+  case'pres':return irr.pres||(g==='ar'?mk(['o','as','a','amos','an']):g==='er'?mk(['o','es','e','emos','en']):mk(['o','es','e','imos','en']));
+  case'impf':return irr.impf||(g==='ar'?mk(['aba','abas','aba','ábamos','aban']):mk(['ía','ías','ía','íamos','ían']));
+  case'fut':{const r=irr.futR||inf;return['é','ás','á','emos','án'].map(x=>r+x)}
+  case'cond':{const r=irr.condR||inf;return['ía','ías','ía','íamos','ían'].map(x=>r+x)}
+  case'ger':return irr.ger||st+(g==='ar'?'ando':'iendo');
+  case'part':return irr.part||st+(g==='ar'?'ado':'ido');}}
+const eIdx=pi=>pi<=2?pi:pi===3?2:pi-1; // ella usa forma de él
+function makeItem(slot){ // {esP(prompt), esHint, quien, accion, cuando, full}
+ const v=rnd(VERBS);let pi=Math.floor(Math.random()*6);
+ const S=ES_SUBJ[pi],EN=P_EN[pi],i=eIdx(pi),b=v.en;
+ switch(slot){
+  case'pasado':return{es:esForms(v,'pret')[i],hint:S,quien:EN,accion:b[1]};
+  case'ahora':return{es:ESTAR[pi]+' '+esForms(v,'ger'),hint:S,quien:EN,accion:P_BE[pi]+' '+b[3]};
+  case'plan':return{es:IR_P[pi]+' a '+v.inf,hint:S,quien:EN,accion:P_BE[pi]+' going to '+b[0]};
+  case'habito':return{es:esForms(v,'pres')[i],hint:S+' · todos los días',quien:EN,accion:(pi===2||pi===3)?b[4]:b[0],cuando:'every day'};
+  case'pregunta':{pi=rnd([1,2,3,5]);const j=eIdx(pi);
+   return{es:'¿'+esForms(v,'pret')[j]+'?',hint:ES_SUBJ[pi],quien:P_EN[pi].toLowerCase(),accion:b[0]+'?',pre:'Did'}}
+  case'negacion':return{es:'no '+esForms(v,'pret')[i],hint:S,quien:EN,accion:"didn't "+b[0]};
+  case'futuro':return{es:esForms(v,'fut')[i],hint:S,quien:EN,accion:'will '+b[0]};
+  case'condicional':return{es:esForms(v,'cond')[i],hint:S,quien:EN,accion:'would '+b[0]};
+  case'antes':return{es:esForms(v,'impf')[i],hint:S+' · antes, muchas veces',quien:EN,accion:'used to '+b[0]};
+  case'perfecto':return{es:HABER[pi]+' '+esForms(v,'part'),hint:S,quien:EN,accion:P_HAVE[pi]+' '+b[2]};
+  case'pluscuam':return{es:HABIA[pi]+' '+esForms(v,'part'),hint:S,quien:EN,accion:'had '+b[2]};}}
+function frameHTML(it){const parts=[];
+ if(it.pre)parts.push(`<span class="fp accion">${esc(it.pre)}</span>`);
+ parts.push(`<span class="fp quien">${esc(it.quien)}</span>`);
+ parts.push(`<span class="fp accion">${esc(it.accion)}</span>`);
+ if(it.cuando)parts.push(`<span class="fp cuando">${esc(it.cuando)}</span>`);
+ return `<div class="frame">${parts.join(' ')}</div>`}
+function fullEN(it){return [it.pre,it.quien,it.accion,it.cuando].filter(Boolean).join(' ')}
+function verbsHome(){title('⚙️ Verbos');
+ const lvOrd={A1:1,A2:2,B1:3,B2:4},cur=lvOrd[ST.level];
+ main.innerHTML=`${levelBar()}
+ <p class="center muted">El tiempo no se memoriza — se ARMA. Dos decisiones.
+ <button class="spk sm" onclick="spk('Usted ya conjuga perfecto en español. Aquí solo cambiamos las piezas al inglés.','es')">🔊</button></p>
+ <div class="legend"><span style="color:var(--quien);border-bottom:3px solid var(--quien)">QUIÉN</span>
+ <span style="color:var(--accion);border-bottom:3px double var(--accion)">ACCIÓN</span>
+ <span style="color:var(--que);border-bottom:3px dotted var(--que)">QUÉ</span>
+ <span style="text-decoration:underline wavy var(--cuando);color:var(--cuando)">CUÁNDO</span></div>
+ <div class="list">
+ <div class="litem" onclick="go(fixedDrill,'be')"><span class="ico">🧲</span><div class="tx"><b>Soy y estoy → I am</b><small>un solo verbo para los dos <span class="tag relief">ALIVIO</span></small></div>›</div>
+ <div class="litem" onclick="go(lvcHome)"><span class="ico">🃏</span><div class="tx"><b>Verbos comodín</b><small>5 verbos → cientos de frases <span class="tag relief">ALIVIO</span> <span class="tag trap">TRAMPA</span></small></div>›</div>
+ ${SLOTS.map((s,ix)=>`<div class="litem" style="${lvOrd[s.lv]>cur?'opacity:.45':''}" onclick="go(slotScr,${ix})">
+  <span class="ico">${['🟢','🟢','🟢','🟡','🟣','🟣','🟢','🟢','🟡','🔴','🟢','🎉'][ix]}</span>
+  <div class="tx"><b>${esc(s.tt)}</b><small>${esc(s.sub)} · ${s.lv} <span class="tag ${s.badge}">${{safe:'SEGURO',split:'SE DIVIDE',trap:'TRAMPA',new:'NUEVO',relief:'ALIVIO'}[s.badge]}</span></small></div>›</div>`).join('')}
+ <div class="litem" onclick="go(suenaScr)"><span class="ico">👂</span><div class="tx"><b>¿Suena bien o suena mal?</b><small>entrene el oído — sin reglas</small></div>›</div>
+ </div>`}
+let slotIt=null,lastSlotKey='';
+function slotScr(ix){title('⚙️ '+SLOTS[ix].tt.split('→')[0].trim());
+ const s=SLOTS[ix];
+ if(s.id==='quiero'){go(fixedDrill,'want');return}
+ let tries=0;
+ do{slotIt=makeItem(s.id)}while(slotIt.es+'|'+slotIt.quien===lastSlotKey&&++tries<8);
+ lastSlotKey=slotIt.es+'|'+slotIt.quien;
+ main.innerHTML=`<div class="card center">
+  <p><b>${esc(s.tt)}</b><br><small class="muted">${esc(s.sub)}</small></p>
+  <p class="muted" style="font-size:15px">(${esc(slotIt.hint)})</p>
+  <p class="bigword es">${esc(slotIt.es)} <button class="spk" onclick="spk('${esc(slotIt.es)}','es')">🔊</button></p>
+  <div id="rev" style="display:none">${frameHTML(slotIt)}
+   <p class="muted" style="font-size:15px">repita en voz alta 3 veces</p>
+   ${recBar(fullEN(slotIt))}</div>
+  <button class="b p big" id="revBtn" onclick="document.getElementById('rev').style.display='';this.style.display='none';spk('${esc(fullEN(slotIt)).replace(/'/g,"\\'")}','en')">¿Cómo se arma en inglés? ⚙️</button>
+ </div>
+ <div class="row"><button class="b g big" onclick="go(slotScr,${ix})">Otra → </button></div>
+ <div class="card center"><p><b>👩‍🏫 Explíquelo usted</b> <small class="muted">— enseñar es la forma más fuerte de aprender</small></p>
+  <p style="font-size:16px">Explique con sus palabras, como a un amigo:<br>¿cómo funciona <b>${esc(s.tt)}</b>?</p>
+  <div class="recbar"><button class="b" onclick="toggleRec(this,'')">🎙️ Grabar mi explicación</button>
+  <button class="b" onclick="playMe()">▶️ Escucharme</button></div></div>`}
+let lastFixed='';
+function fixedDrill(kind){const bank=kind==='be'?BE_DRILL:WANT_DRILL;
+ title(kind==='be'?'🧲 Soy y estoy → I am':'🎉 Quiero que… → want…to');
+ let it,tries=0;
+ do{it=rnd(bank)}while(it.es===lastFixed&&++tries<8);
+ lastFixed=it.es;
+ main.innerHTML=`${kind==='want'?'<p class="note">🎉 ¡Buenas noticias! El subjuntivo NO existe en inglés. Solo: want + persona + to + verbo.</p>':'<p class="note">ser y estar → en inglés es UN solo verbo: am · is · are (pasado: was · were)</p>'}
+ <div class="card center">
+  <p class="bigword es" style="font-size:34px">${esc(it.es)} <button class="spk sm" onclick="spk('${esc(it.es)}','es')">🔊</button></p>
+  <div id="rev" style="display:none"><p class="bigword en" style="font-size:32px">${esc(it.en)}</p>${recBar(it.en)}</div>
+  <button class="b p big" onclick="document.getElementById('rev').style.display='';this.style.display='none';spk('${esc(it.en).replace(/'/g,"\\'")}','en')">¿En inglés? 👂</button>
+ </div>
+ <div class="row"><button class="b g big" onclick="go(fixedDrill,'${kind}')">Otra →</button></div>`}
+let su=null;
+function suenaScr(){title('👂 ¿Suena bien o mal?');
+ if(!su||su.done)su={i:0,ok:0,items:shuf(SUENA).slice(0,10)};
+ const q=su.items[su.i];
+ if(!q){su.done=true;main.innerHTML=`<div class="card center"><p class="score">${su.ok}/10</p>
+  <button class="b p big" onclick="su=null;go(suenaScr)">Otra vez</button></div>`;return}
+ main.innerHTML=`<div class="progress"><div style="width:${su.i*10}%"></div></div>
+ <div class="card center"><p class="muted">Primero ESCUCHE con los ojos cerrados 👀❌</p>
+  <button class="spk" style="width:74px;height:74px;font-size:34px" onclick="spk('${esc(q.en).replace(/'/g,"\\'")}','en',0.85)">🔊</button>
+  <p id="sTxt" class="bigword en" style="font-size:26px;filter:blur(8px)" onclick="this.style.filter=''">${esc(q.en)}</p>
+  <p class="muted" style="font-size:14px">(toque la frase para verla)</p></div>
+ <div class="row">
+  <button class="b g big" style="width:46%" onclick="suAns(true)">😊 Suena BIEN</button>
+  <button class="b r big" style="width:46%" onclick="suAns(false)">😖 Suena MAL</button></div>
+ <div id="sWhy"></div>`}
+window.suAns=(ans)=>{const q=su.items[su.i],right=ans===q.ok;if(right)su.ok++;
+ gradeItem('su|'+q.en,right,'oído');track('suena',right);
+ document.getElementById('sTxt').style.filter='';
+ document.getElementById('sWhy').innerHTML=`<div class="note ${right?'':'w'}">${right?'✅':'❌'} ${q.ok?'Suena bien.':'Suena mal — '+esc(q.why||'')}</div>`;
+ setTimeout(()=>{su.i++;suenaScr()},q.ok?900:2400);};
+// ================= VERBOS COMODÍN (light verbs) =================
+const LVC_ICO={take:'🤲',make:'🔨',have:'☕',give:'🎁',do:'✅'};
+function lvcHome(){title('🃏 Verbos comodín');
+ main.innerHTML=`<p class="center muted"><b>Con 5 verbos se hacen cientos de frases.</b><br>El verbo casi no significa nada — el significado vive en el sustantivo.
+ <button class="spk sm" onclick="spk('Buenas noticias: con solo cinco verbos — take, make, have, give y do — se construyen cientos de frases. El verbo es la llave; el significado vive en el sustantivo. Y usted ya hace esto en español: tomar una decisión, dar un paseo.','es')">🔊</button></p>
+ <div class="list">
+  <div class="litem" onclick="go(lvcKeys,0)"><span class="ico">🗝️</span><div class="tx"><b>Las 5 llaves</b><small>take · make · have · give · do</small></div>›</div>
+  <div class="litem" onclick="go(lvcBuckets)"><span class="ico">🪣</span><div class="tx"><b>Cubetas</b><small>¿qué verbo va con cada cosa?</small></div>›</div>
+  <div class="litem" onclick="go(lvcDrill)"><span class="ico">⚡</span><div class="tx"><b>Del español, ¡ya!</b><small>tomar una decisión → make a decision</small></div>›</div>
+  <div class="litem" onclick="go(lvcBuild)"><span class="ico">🧱</span><div class="tx"><b>Hacer crecer la frase</b><small>a decision → a quick decision</small></div>›</div>
+ </div>
+ <p class="note w">⚠️ La trampa: su español elige el verbo por usted — y a veces elige MAL.<br>tomar una decisión ≠ <s>take</s> → <b>make</b> a decision · dar un paseo ≠ <s>give</s> → <b>take</b> a walk</p>`}
+function lvcKeys(i){const v=LVC_VERBS[i];
+ if(!v){main.innerHTML=`<div class="card center">🗝️ ¡Las 5 llaves vistas! <button class="b p big" onclick="go(lvcBuckets)">🪣 A las cubetas</button></div>`;return}
+ title('🗝️ '+(i+1)+'/5 — '+v);
+ const ex=shuf(LVC.filter(x=>x.v===v)).slice(0,4);
+ main.innerHTML=`<div class="progress"><div style="width:${i/5*100}%"></div></div>
+ <div class="card center">
+  <p style="font-size:50px;margin:0">${LVC_ICO[v]}</p>
+  <p class="bigword en">${v} <span class="pos">v.</span> ${spkBtn(v,'en')}</p>
+  <p class="muted">Solo, casi no significa nada. Mire dónde vive el significado:</p>
+  ${ex.map(x=>`<div class="storyline"><button class="spk sm" onclick="spk('${esc(x.v+' '+x.n).replace(/'/g,"\\'")}','en')">🔊</button>
+   <div class="txt">${x.v} <b style="color:var(--que)">${esc(x.n)}</b> <span class="pos">${esc(x.pos)}</span><span class="es">${esc(x.es)}</span></div></div>`).join('')}
+ </div>
+ <div class="row"><button class="b" onclick="go(lvcKeys,${Math.max(0,i-1)})">←</button>
+ <button class="b g big" style="flex:1" onclick="go(lvcKeys,${i+1})">Siguiente llave →</button></div>`}
+function lvcBuckets(){const items=shuf(LVC).slice(0,10).map(qLVC);
+ runQuiz(items,'🪣 Cubetas — ¿qué verbo?',r=>{const hint=zpdHint('lvc');
+  main.innerHTML=`<div class="card center"><p style="font-size:46px">${r.ok>=8?'🌟':'💪'}</p>
+  <p class="score">${r.ok}/${r.n}</p>
+  <p class="muted">Los fallos no se pierden — vuelven mañana en el repaso.</p>
+  ${hint?`<p class="note">${hint}</p>`:''}
+  <button class="b p big" onclick="go(lvcBuckets)">Otra ronda</button></div>`})}
+let lastLvc='';
+function lvcDrill(){title('⚡ Del español, ¡ya!');
+ let it,tries=0;
+ do{it=rnd(LVC.filter(x=>x.cat!=='A'))}while((it.v+it.n)===lastLvc&&++tries<8);
+ lastLvc=it.v+it.n;
+ const cue=(it.esv&&Math.random()<0.5)?it.esv+' (una sola palabra)':it.es;
+ const full=it.v+' '+it.n;
+ main.innerHTML=`<div class="card center">
+  <p class="muted">Dígalo en inglés — EN VOZ ALTA ⏱️</p>
+  <p class="bigword es" style="font-size:28px">${esc(cue)} ${spkBtn(cue.replace(/ \(.*\)/,''),'es')}</p>
+  <div id="rev" style="display:none">
+   <p class="bigword en" style="font-size:30px"><b style="color:var(--accion)">${it.v}</b> <b style="color:var(--que)">${esc(it.n)}</b> ${spkBtn(full,'en')}</p>
+   ${it.err?`<p class="note w">⚠️ NO es "<s>${it.err} ${esc(it.n)}</s>" — su español le susurra mal aquí.</p>`:''}
+   ${recBar(full)}
+  </div>
+  <button class="b p big" onclick="document.getElementById('rev').style.display='';this.style.display='none';spk('${esc(full)}','en')">¿Cómo se dice? 👀</button>
+ </div>
+ <div class="row"><button class="b g big" onclick="go(lvcDrill)">Otra →</button></div>`}
+function lvcBuild(){title('🧱 Hacer crecer la frase');
+ const pool=LVC.filter(x=>x.adj);const it=rnd(pool);
+ const art=a=>/^[aeiou]/i.test(a)?'an':'a';
+ const base=it.v+' '+it.n;
+ const grow=a=>{if(/^an? /.test(it.n))return it.v+' '+art(a)+' '+a+' '+it.n.replace(/^an? /,'');
+  if(/^the /.test(it.n))return it.v+' the '+a+' '+it.n.replace(/^the /,'');
+  return it.v+' '+a+' '+it.n};
+ main.innerHTML=`<p class="center muted">El truco de los nativos: el sustantivo deja meter adjetivos.<br>Toque un bloque y escuche cómo crece. 🔊</p>
+ <div class="card center">
+  <p class="bigword en" style="font-size:28px" id="bw">${esc(base)}</p>
+  <button class="spk" onclick="spk(document.getElementById('bw').textContent,'en')">🔊</button>
+  <div class="row" style="margin-top:10px">
+   <button class="b" onclick="document.getElementById('bw').textContent='${esc(base)}';spk('${esc(base)}','en')">∅ simple</button>
+   ${it.adj.map(a=>{const g=grow(a);
+    return `<button class="b w" onclick="document.getElementById('bw').textContent='${esc(g)}';spk('${esc(g)}','en')">+ ${esc(a)}</button>`}).join('')}
+  </div>
+  <p class="muted" style="margin-top:10px">${esc(it.es)}</p>
+  ${recBar(grow(it.adj[0]))}
+ </div>
+ <div class="row"><button class="b g big" onclick="go(lvcBuild)">Otra frase →</button></div>`}
+// ================= SOS =================
+// pictogramas de gesto (offline, SVG)
+const _S='fill="none" stroke="#1d4ed8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"';
+const SOSPIC=[
+ // 1 repetir: flecha circular
+ `<svg viewBox="0 0 100 100"><path ${_S} d="M78 50a28 28 0 1 1-8-19"/><path ${_S} d="M70 14v18H52" /></svg>`,
+ // 2 despacio: dos palmas hacia abajo
+ `<svg viewBox="0 0 100 100"><rect x="14" y="28" width="26" height="16" rx="8" ${_S}/><rect x="60" y="28" width="26" height="16" rx="8" ${_S}/><path ${_S} d="M27 56v22m0 0-8-9m8 9 8-9"/><path ${_S} d="M73 56v22m0 0-8-9m8 9 8-9"/></svg>`,
+ // 3 no entiendo: cara + ?
+ `<svg viewBox="0 0 100 100"><circle cx="38" cy="46" r="22" ${_S}/><circle cx="31" cy="42" r="2.6" fill="#1d4ed8"/><circle cx="45" cy="42" r="2.6" fill="#1d4ed8"/><path ${_S} d="M31 56h14"/><path ${_S} d="M68 24c8-6 20-2 20 8 0 8-9 9-9 17"/><circle cx="79" cy="62" r="3.4" fill="#1d4ed8"/></svg>`,
+ // 4 qué significa: tarjeta con palabra + dedo
+ `<svg viewBox="0 0 100 100"><rect x="16" y="20" width="68" height="34" rx="8" ${_S}/><path ${_S} d="M26 37h26M62 37h12"/><path ${_S} d="M50 84V62m0 0-9 10m9-10 9 10"/></svg>`,
+ // 5 cómo se dice: boca + burbuja
+ `<svg viewBox="0 0 100 100"><path ${_S} d="M20 64c10 10 30 10 40 0"/><path ${_S} d="M14 52h52"/><rect x="56" y="14" width="32" height="24" rx="8" ${_S}/><path ${_S} d="M64 44l4-8"/><text x="72" y="32" font-size="15" font-weight="bold" fill="#1d4ed8" text-anchor="middle">EN</text></svg>`,
+ // 6 escríbalo: lápiz sobre papel
+ `<svg viewBox="0 0 100 100"><rect x="14" y="30" width="56" height="50" rx="6" ${_S}/><path ${_S} d="M24 48h26M24 60h20M24 70h26"/><path ${_S} d="M84 22 60 46l-4 12 12-4 24-24z" transform="scale(.9) translate(4 4)"/></svg>`,
+ // 7 un momento: dedo índice arriba
+ `<svg viewBox="0 0 100 100"><path ${_S} d="M46 16v34"/><rect x="32" y="48" width="36" height="32" rx="14" ${_S}/><path ${_S} d="M68 58h10M68 68h8"/></svg>`,
+ // 8 estoy aprendiendo: libro + corazón
+ `<svg viewBox="0 0 100 100"><path ${_S} d="M50 44v36M50 44c-8-6-22-6-32-2v36c10-4 24-4 32 2 8-6 22-6 32-2V42c-10-4-24-4-32 2z"/><path ${_S} d="M50 30c-2-7-12-9-15-3-2 5 3 10 15 16 12-6 17-11 15-16-3-6-13-4-15 3z" fill="#dbeafe"/></svg>`,
+ // 9 excuse me?: oreja
+ `<svg viewBox="0 0 100 100"><path ${_S} d="M38 70c-6-6-10-14-10-24a22 22 0 0 1 44 0c0 10-6 14-10 20-3 5-4 10-12 10"/><path ${_S} d="M44 46a10 10 0 0 1 16 4"/><path ${_S} d="M76 24l8-8M82 40h12M70 14l4-10"/></svg>`,
+ // 10 is that correct?: check en tarjeta
+ `<svg viewBox="0 0 100 100"><rect x="18" y="20" width="64" height="60" rx="10" ${_S}/><path ${_S} d="M32 52l12 12 24-28"/></svg>`];
+function sosHome(){title('🆘 SOS');
+ main.innerHTML=`<p class="center muted">Si no entiende: ¡NUNCA en silencio! Pregunte en 1 segundo.
+ <button class="spk sm" onclick="spk('Cuando no entienda algo, no se quede en silencio. Use una de estas ocho frases. Preguntar es ganar.','es')">🔊</button></p>
+ <div class="list">
+  <div class="litem" onclick="go(sosCards,0)"><span class="ico">🃏</span><div class="tx"><b>Las 8 frases + 2 bonus</b><small>aprender con gesto</small></div>›</div>
+  <div class="litem" onclick="go(sosEco,0)"><span class="ico">🗣️</span><div class="tx"><b>Eco con gesto</b><small>cada frase ×3, boca y mano juntas</small></div>›</div>
+  <div class="litem" onclick="go(sosFire)"><span class="ico">⚡</span><div class="tx"><b>¡Dispara!</b><small>situación → frase en 1 segundo</small></div>›</div>
+  <div class="litem" onclick="go(sosInt)"><span class="ico">✋</span><div class="tx"><b>¡Interrumpa!</b><small>escuche la historia — pare al oír la trampa</small></div>›</div>
+ </div>
+ <p class="note">💡 La frase #8 es su escudo: <b>I'm learning English.</b> Dígala primero y la gente hablará más despacio.</p>
+ <p class="note w">⚡ Regla de oro: silencio de 3 segundos = perder · preguntar = ganar. Aunque la frase salga imperfecta, ¡disparar ya es medio punto!</p>`}
+function sosCards(i){title('🃏 SOS '+(i+1)+'/'+SOS.length);
+ const c=SOS[i];if(!c){main.innerHTML=`<div class="card center">💪 ¡Listo! Ahora: <button class="b p big" onclick="go(sosEco,0)">🗣️ Eco con gesto</button></div>`;return}
+ main.innerHTML=`<div class="progress"><div style="width:${i/SOS.length*100}%"></div></div>
+ <div class="card center">
+  <p style="font-size:28px;margin:0 0 8px">#${c.n}${c.aux?' <span class="tag relief">BONUS</span>':''}</p>
+  <div class="sospic">${SOSPIC[i]}</div>
+  <p class="bigword en" style="font-size:30px">${esc(c.en)} <button class="spk" onclick="spk('${esc(c.en).replace(/'/g,"\\'")}','en')">🔊</button></p>
+  <p class="muted" style="font-size:20px">${esc(c.es)} <button class="spk sm" onclick="spk('${esc(c.es)}','es')">🔊</button></p>
+  <div class="gesture">Gesto: ${esc(c.g)} — haga el gesto SIEMPRE al decirla</div>
+  ${recBar(c.en)}
+ </div>
+ <div class="row"><button class="b" onclick="go(sosCards,${Math.max(0,i-1)})">←</button>
+ <button class="b g big" style="flex:1" onclick="go(sosCards,${i+1})">Siguiente →</button></div>`}
+let fire=null;
+function sosFire(){title('⚡ ¡Dispara!');
+ if(!fire||fire.done)fire={i:0,ok:0,t0:0,items:shuf(SOS_SIT).slice(0,10)};
+ const q=fire.items[fire.i];
+ if(!q){fire.done=true;main.innerHTML=`<div class="card center"><p style="font-size:46px">${fire.ok>=8?'🌟':'💪'}</p>
+  <p class="score">${fire.ok}/10</p><p class="muted">Silencio = perder · Preguntar = ganar</p>
+  <button class="b p big" onclick="fire=null;go(sosFire)">Otra ronda</button></div>`;return}
+ fire.t0=Date.now();spk(q.cue,'es');
+ main.innerHTML=`<div class="progress"><div style="width:${fire.i/10*100}%"></div></div>
+ <div class="card center"><p class="muted">Situación <button class="spk sm" onclick="spk('${esc(q.cue)}','es')">🔊</button></p>
+ <p style="font-size:21px;font-weight:700">${esc(q.cue)}</p>
+ <p class="muted">¿Qué frase dispara? ⏱️</p></div>
+ <div class="menu">${SOS.filter(c=>!c.aux).map(c=>`<button class="opt sositem" style="margin:0" onclick="fireAns(this,${c.n})"><span class="sospic sm">${SOSPIC[c.n-1]}</span><span><b>#${c.n}</b> ${esc(c.en)}</span></button>`).join('')}</div>`}
+window.fireAns=(btn,n)=>{const q=fire.items[fire.i],ok=n===q.card,dt=((Date.now()-fire.t0)/1000).toFixed(1);
+ btn.classList.add(ok?'ok':'no');if(ok)fire.ok++;
+ gradeItem('s|'+q.card,ok,'SOS');track('sos',ok);
+ const c=SOS.find(c=>c.n===q.card);
+ if(!ok)document.querySelectorAll('.opt')[q.card-1].classList.add('ok');
+ btn.insertAdjacentHTML('beforebegin',`<div class="note">${ok?(dt<3?'⚡ ¡'+dt+' segundos!':'✅ bien, más rápido la próxima ('+dt+'s)'):'👂 era: '+esc(c.en)}</div>`);
+ speakThen(c.en,'en',null,1000,()=>{fire.i++;sosFire()});};
+// ===== Eco con gesto: cada frase ×3, boca y mano juntas =====
+let ecoN=0;
+function sosEco(i){title('🗣️ Eco '+(Math.min(i+1,SOS.length))+'/'+SOS.length);
+ const c=SOS[i];
+ if(!c){main.innerHTML=`<div class="card center"><p style="font-size:46px">💪</p><p><b>Las ${SOS.length} frases, en la boca y en la mano.</b></p>
+  <button class="b p big" onclick="go(sosFire)">⚡ Ahora: ¡Dispara!</button></div>`;return}
+ ecoN=0;
+ main.innerHTML=`<div class="progress"><div style="width:${i/SOS.length*100}%"></div></div>
+ <div class="card center">
+  <div class="sospic">${SOSPIC[i]}</div>
+  <p class="bigword en" style="font-size:26px">${esc(c.en)} ${spkBtn(c.en,'en')} ${spkBtn(c.en,'en','0.75')}</p>
+  <p class="muted">${esc(c.es)}</p>
+  <div class="gesture">Gesto: ${esc(c.g)} — sin gesto, no cuenta</div>
+  <p class="muted" style="font-size:15px">Escuche → dígala EN VOZ ALTA con el gesto → toque ✓. Tres veces, cada vez más rápido.</p>
+  <p id="ecoDots" style="font-size:30px;margin:6px 0">⚪⚪⚪</p>
+  <div class="recbar"><button class="b" onclick="toggleRec(this,'')">🎙️ Grabar</button><button class="b" onclick="playMe()">▶️ Mi voz</button></div>
+  <button class="b g big" onclick="ecoTap(${i})">✓ La dije con gesto</button>
+ </div>`;
+ spk(c.en,'en');}
+window.ecoTap=(i)=>{ecoN++;const d=document.getElementById('ecoDots');
+ if(d)d.textContent='🟢'.repeat(Math.min(ecoN,3))+'⚪'.repeat(Math.max(0,3-ecoN));
+ if(ecoN>=3){gradeItem('s|'+SOS[i].n,true,'SOS');track('sos',true);setTimeout(()=>go(sosEco,i+1),450)}
+ else spk(SOS[i].en,'en')};
+// ===== ¡Interrumpa!: historia con trampas — silencio = perder =====
+let INT=null;
+function sosInt(){title('✋ ¡Interrumpa!');
+ const pool=STORIES.filter(s=>s.lines.some(l=>l.traps));
+ const mine=pool.filter(x=>x.lv===ST.level);
+ const s=mine.length?rnd(mine):rnd(pool);
+ INT={s,li:0,hits:0,traps:0,on:true,t0:0};
+ main.innerHTML=`<p class="center muted">Voy a leer “${esc(s.tt)}”. Hay palabras-trampa A PROPÓSITO.
+ Cuando oiga una palabra desconocida: ¡pare la historia con la frase correcta! Silencio de 3 segundos = punto perdido.
+ <button class="spk sm" onclick="spk('Voy a leer una historia con palabras difíciles a propósito. Su trabajo no es entenderlo todo. Su trabajo es interrumpir: parar la historia y preguntar. Preguntar es ganar.','es')">🔊</button></p>
+ <div class="card center" id="intBox"><p style="font-size:44px">👂</p><button class="b p big" onclick="intPlay()">▶️ Empezar</button></div>
+ <div id="intQ"></div>`}
+window.intPlay=async()=>{const s=INT.s;stopBar(true);
+ while(INT.on&&INT.li<s.lines.length){
+  const L=s.lines[INT.li],box=document.getElementById('intBox');
+  if(box)box.innerHTML=`<p class="muted">frase ${INT.li+1}/${s.lines.length} · interrupciones ${INT.hits}/${INT.traps}</p>
+   <p style="font-size:44px">👂</p>
+   <p class="muted" style="filter:blur(6px);cursor:pointer" onclick="this.style.filter=''">${esc(L.en)}</p>`;
+  await speakLine(L.en);
+  if(!INT.on)return;
+  if(L.traps){const w=Object.keys(L.traps)[0];INT.traps++;INT.t0=Date.now();
+   const opts=shuf([{label:`What does "${w}" mean?`,ok:true},
+    ...shuf(SOS.filter(c=>!c.aux&&c.n!==4)).slice(0,3).map(c=>({label:c.en,ok:false}))]);
+   const qd=document.getElementById('intQ');
+   if(qd)qd.innerHTML=`<p class="center" style="font-weight:800">⚡ ¡AHORA! ¿Qué dispara?</p>
+    ${opts.map(o=>`<button class="opt" onclick="intAns(this,${o.ok},'${esc(w)}','${esc(L.traps[w]).replace(/'/g,"\\'")}')">${esc(o.label)}</button>`).join('')}`;
+   return}
+  INT.li++;
+  await new Promise(r=>setTimeout(r,500));}
+ if(INT.on)intEnd()};
+window.intAns=(btn,ok,w,def)=>{const dt=((Date.now()-INT.t0)/1000).toFixed(1);
+ btn.classList.add(ok?'ok':'no');if(ok)INT.hits++;
+ gradeItem('s|4',ok,'SOS');track('sos',ok);
+ const qd=document.getElementById('intQ');
+ if(qd)qd.insertAdjacentHTML('beforeend',`<div class="note">${ok?(dt<3?'⚡ ¡'+dt+'s!':'✅ ('+dt+'s — más rápido la próxima)'):'👂 era: What does it mean?'} · “${esc(w)}” = ${esc(def)}</div>`);
+ speakThen('What does '+w+' mean? ... '+w+'.','en',null,1100,()=>{const q=document.getElementById('intQ');if(q)q.innerHTML='';INT.li++;intPlay()})};
+function intEnd(){INT.on=false;
+ main.innerHTML=`<div class="card center"><p style="font-size:46px">${INT.hits>=INT.traps*0.75?'🏆':'💪'}</p>
+ <p class="score">${INT.hits}/${INT.traps} interrupciones</p>
+ <p class="muted">En la vida real es igual: la pregunta a tiempo vale más que entenderlo todo.</p>
+ <div class="row"><button class="b p big" onclick="go(sosInt)">Otra historia</button></div></div>`}
+// ================= FRASES =================
+function framesHome(){title('🧩 Frases listas');
+ main.innerHTML=`<p class="center muted">No calcule — use el marco y cambie UNA pieza.
+ <button class="spk sm" onclick="spk('No construya cada frase desde cero. Use el marco completo y cambie solo una pieza.','es')">🔊</button></p>
+ <div class="list">
+  <div class="litem" onclick="go(frameScr,0)"><span class="ico">🧩</span><div class="tx"><b>Marcos</b><small>I want to ___ · I have to ___ …</small></div>›</div>
+  <div class="litem" onclick="go(prepScr)"><span class="ico">🔗</span><div class="tx"><b>Palabritas pegadas</b><small>wait FOR · listen TO · AT six</small></div>›</div>
+  <div class="litem" onclick="go(speedScr)"><span class="ico">🏁</span><div class="tx"><b>Batalla de velocidad</b><small>español → inglés ¡ya!</small></div>›</div>
+ </div>`}
+// rellena 1 o 2 huecos: "feliz / mi familia está aquí" → hueco1 / hueco2
+function fillFrame(tpl,fill){let out=tpl;
+ for(const part of String(fill).split(' / '))out=out.replace('___',part);
+ return out}
+function frameScr(i){title('🧩 Marcos');
+ const f=FRAMES[i];if(!f){main.innerHTML=`<div class="card center">🎉 ¡Todos los marcos! <button class="b p big" onclick="go(frameScr,0)">Otra vez</button></div>`;return}
+ const ex=f.fill.map(x=>x.split('|'));
+ main.innerHTML=`<div class="progress"><div style="width:${i/FRAMES.length*100}%"></div></div>
+ <div class="card center">
+  <p class="bigword en" style="font-size:30px">${esc(f.en)} <button class="spk" onclick="spk('${esc(f.en.replace('___','...')).replace(/'/g,"\\'")}','en')">🔊</button></p>
+  <p class="muted">${esc(f.es)}</p>
+  <div class="list" style="margin-top:10px">${ex.map(e=>{const full=fillFrame(f.en,e[0]),fes=fillFrame(f.es,e[1]||'');
+   return `<div class="storyline"><button class="spk sm" onclick="spk('${esc(full).replace(/'/g,"\\'")}','en')">🔊</button>
+   <div class="txt">${esc(full)}<span class="es">${esc(fes)}</span></div></div>`}).join('')}</div>
+  ${recBar(fillFrame(f.en,ex[0][0]))}
+ </div>
+ <div class="row"><button class="b" onclick="go(frameScr,${Math.max(0,i-1)})">←</button>
+ <span class="muted">${i+1}/${FRAMES.length}</span>
+ <button class="b g" onclick="go(frameScr,${i+1})">Siguiente →</button></div>`}
+let pq=null;
+function prepScr(){title('🔗 Palabritas pegadas');
+ if(!pq||pq.done)pq={i:0,ok:0,items:shuf(PREPS).slice(0,10)};
+ const q=pq.items[pq.i];
+ if(!q){pq.done=true;main.innerHTML=`<div class="card center"><p class="score">${pq.ok}/10</p>
+  <button class="b p big" onclick="pq=null;go(prepScr)">Otra vez</button></div>`;return}
+ const gap=q.en.replace(PREP_RE,'___');
+ const opts=shuf(PREP_POOL.filter(o=>o!==q.key)).slice(0,3);
+ opts.push(q.key);
+ main.innerHTML=`<div class="progress"><div style="width:${pq.i*10}%"></div></div>
+ <p class="note">La palabrita va PEGADA a la palabra — apréndalas juntas, como una sola.</p>
+ <div class="card center"><p class="muted">${esc(q.es)}</p>
+ <p class="bigword en" style="font-size:30px">${esc(gap)}</p></div>
+ <div class="row">${shuf(opts).map(o=>`<button class="b big" style="width:46%" onclick="pAns(this,'${o}')">${o.toUpperCase()}</button>`).join('')}</div>`}
+window.pAns=(btn,o)=>{const q=pq.items[pq.i],ok=o===q.key;
+ btn.style.background=ok?'var(--good)':'var(--bad)';btn.style.color='#fff';if(ok)pq.ok++;
+ gradeItem('p|'+q.en,ok,'preposición pegada');track('preps',ok);
+ speakThen(q.en.toLowerCase(),'en',null,900,()=>{pq.i++;prepScr()});};
+let sp=null;
+function speedScr(){title('🏁 Batalla de velocidad');
+ if(!sp||sp.done){
+  const base=shuf(SPEED).slice(0,20),nTrue=8+Math.floor(Math.random()*5); // 8~12 correctas, al azar
+  const flags=shuf(Array.from({length:20},(_,k)=>k<nTrue));
+  const items=base.map((q,k)=>{let shown=q.en;
+   if(!flags[k]){let w;do{w=rnd(SPEED)}while(w.en===q.en);shown=w.en}
+   return{es:q.es,en:q.en,shown,match:flags[k]}});
+  sp={i:0,ok:0,items,t0:Date.now()};}
+ const q=sp.items[sp.i];
+ if(!q){sp.done=true;const secs=Math.round((Date.now()-sp.t0)/1000),pass=sp.ok>=15;
+  main.innerHTML=`<div class="card center"><p style="font-size:46px">${pass?'🏆':'💪'}</p>
+  <p class="score">${sp.ok}/20 · ${secs}s</p><p class="muted">${pass?'¡Pasó la línea del 75%!':'Línea de paso: 15 — ¡otra vez!'}</p>
+  <button class="b p big" onclick="sp=null;go(speedScr)">Otra ronda</button></div>`;return}
+ main.innerHTML=`<div class="progress"><div style="width:${sp.i*5}%"></div></div>
+ <div class="card center"><p class="muted">¿La traducción es correcta? ⏱️</p>
+ <p class="bigword es" style="font-size:26px">${esc(q.es)}</p>
+ <p style="font-size:22px;margin:6px 0">⬇️</p>
+ <p class="bigword en" style="font-size:25px">${esc(q.shown)} <button class="spk sm" onclick="spk('${esc(q.shown).replace(/'/g,"\\'")}','en')">🔊</button></p>
+ <div class="row" id="marks">
+  <button class="b g big" style="width:46%" onclick="spMark(true)">✅ Correcta</button>
+  <button class="b r big" style="width:46%" onclick="spMark(false)">❌ Está mal</button></div>
+ <div id="spFb"></div>
+ </div>`}
+window.spMark=(ans)=>{const q=sp.items[sp.i],right=ans===q.match;if(right)sp.ok++;
+ gradeItem('sp|'+q.es,right,'velocidad');track('speed',right);
+ document.getElementById('marks').style.display='none';
+ document.getElementById('spFb').innerHTML=`<div class="note ${right?'':'w'}">${right?'✅':'❌'} ${q.match?'Era correcta.':'Era falsa. La buena: <b>'+esc(q.en)+'</b>'}</div>`;
+ speakThen(q.en,'en',null,right?500:1300,()=>{sp.i++;speedScr()});};
+// ================= HISTORIAS =================
+function storiesHome(){title('🎧 Historias');
+ main.innerHTML=`${levelBar()}
+ <p class="center muted">Primero el OÍDO, después los ojos.
+ <button class="spk sm" onclick="spk('Escuche la historia primero, sin leer. Después escuche otra vez leyendo. Al final, repita usted.','es')">🔊</button></p>
+ <div class="list">
+  <div class="litem" style="background:#eff6ff" onclick="go(booksHome)"><span class="ico">📖</span><div class="tx"><b>Cuentos clásicos</b><small>leer y escuchar · velocidad · su voz favorita</small></div>›</div>
+ ${STORIES.filter(s=>s.lv===ST.level||true).map((s,ix)=>`
+  <div class="litem" style="${s.lv!==ST.level?'opacity:.5':''}" onclick="go(storyScr,${ix})">
+  <span class="ico">${s.ico||'🎧'}</span><div class="tx"><b>${esc(s.tt)}</b><small>${s.lv} · ${s.lines.length} frases${s.dialog?' · diálogo':''}</small></div>›</div>`).join('')}
+ </div>`}
+let stShow=false,stES=false,SCAST={},SCASTHD={};
+// reparto: cada personaje recibe una voz distinta (género y acento variados, al azar)
+function buildCast(s){SCAST={};SCASTHD={};if(!s.dialog)return;
+ const who=[...new Set(s.lines.filter(l=>l.who).map(l=>l.who))];
+ // reparto HD primero (no depende de las voces del teléfono)
+ if(ST.hd&&HD.lib){const hv=HD_VOICES.filter(v=>v.l==='en'&&HD.stored.includes(v.id));
+  if(hv.length){const F=shuf(hv.filter(v=>v.g==='👩')),M=shuf(hv.filter(v=>v.g==='👨'));
+   const sF=Math.random()<0.5;let pal2=[];
+   for(let i=0;i<who.length;i++){const pick=(sF?i%2===0:i%2===1)?(F.shift()||M.shift()):(M.shift()||F.shift());
+    if(pick)pal2.push(pick.id)}
+   if(!pal2.length)pal2=hv.map(v=>v.id);
+   who.forEach((w,i)=>{SCASTHD[w]=pal2[i%pal2.length]})}}
+ let evs=enVoices().filter(v=>vScore(v,'en-us')>0);if(!evs.length)return;
+ const prem=evs.filter(isPremium);if(prem.length>=2)evs=prem; // reparto solo con voces premium si las hay
+ const seen={},fem=[],mas=[],neu=[];
+ for(const v of evs){const k=v.lang+(FEM_RE.test(v.name.toLowerCase())?'f':MASC_RE.test(v.name.toLowerCase())?'m':'n');
+  if(seen[k])continue;seen[k]=1;
+  (FEM_RE.test(v.name.toLowerCase())?fem:MASC_RE.test(v.name.toLowerCase())?mas:neu).push(v)}
+ const F=shuf(fem),M=shuf(mas),N=shuf(neu);
+ let pal=[];const startF=Math.random()<0.5; // combinación al azar: M/F, F/F, F/M…
+ for(let i=0;i<who.length;i++){const pick=(startF?i%2===0:i%2===1)?(F.shift()||M.shift()||N.shift()):(M.shift()||F.shift()||N.shift());
+  if(pick)pal.push(pick)}
+ if(!pal.length)pal=evs.slice(0,2);
+ who.forEach((w,i)=>{SCAST[w]=pal[i%pal.length]})}
+window.spkWho=(text,who,rate)=>{try{speechSynthesis.cancel()}catch(e){}
+ stopHdAudio();
+ if(hdOK('en')){hdSpeak(text,'en',rate,(who&&SCASTHD[who])||null);return}
+ try{const u=new SpeechSynthesisUtterance(text);u.lang='en-US';
+ const v=(who&&SCAST[who])||pickVoice('en');if(v)u.voice=v;
+ u.rate=rate||ST.rate||0.92;speechSynthesis.speak(u);}catch(e){}};
+function storyScr(ix){title((STORIES[ix].ico||'🎧')+' '+STORIES[ix].tt);
+ const s=STORIES[ix];stShow=stShow||false;buildCast(s);
+ main.innerHTML=`
+ <div class="row" style="margin-bottom:6px">
+  <button class="b p" onclick="playAll(${ix},0.75)">🐢 Escuchar lento</button>
+  <button class="b p" onclick="playAll(${ix},1)">🔊 Normal</button>
+  <button class="b" onclick="stShow=!stShow;go(storyScr,${ix})">${stShow?'🙈 Ocultar texto':'👀 Ver texto'}</button>
+  <button class="b" onclick="stES=!stES;go(storyScr,${ix})">${stES?'ES ✓':'ES'}</button>
+  <button class="b" onclick="ST.notice=!ST.notice;save();go(storyScr,${ix})" title="resaltar las formas del inglés">${ST.notice?'🔍 Formas ✓':'🔍 Formas'}</button></div>
+ ${s.lines.map((L,li)=>{
+  let txt=esc(L.en);
+  if(L.traps)for(const w in L.traps)txt=txt.replace(new RegExp('\\b'+w+'\\b','i'),m=>`<span class="trap" onclick="event.stopPropagation();trapTap('${esc(w)}','${esc(L.traps[w]).replace(/'/g,"\\'")}')">${m}</span>`);
+  txt=noticeHL(txt);
+  return `<div class="storyline ${stShow?'':'hide'}" onclick="this.classList.remove('hide')">
+   <button class="spk sm" onclick="event.stopPropagation();spkWho('${esc(L.en).replace(/'/g,"\\'")}','${L.who?esc(L.who).replace(/'/g,"\\'"):''}',0.85)">🔊</button>
+   <div class="txt">${L.who?`<b>${esc(L.who)}:</b> `:''}${txt}${stES?`<span class="es">${esc(L.es)}</span>`:''}</div>
+   <button class="spk sm" style="background:#fef3c7;color:#b45309" title="repetir yo" onclick="event.stopPropagation();toggleRec(this,'')">🎙️</button>
+  </div>`}).join('')}
+ <p class="note">🪤 Palabras amarillas = trampa. Tóquelas y pregunte: <b>What does it mean?</b>${ST.notice?' · 🔍 Lo azul = las formas que el inglés usa — solo nótelas.':''}</p>
+ <div class="card center"><p><b>Ahora usted 🗣️</b> — repita la historia con su voz</p>${recBar(s.lines.map(l=>l.en).join(' '))}</div>
+ ${SES.on&&SES.stage===1?'<button class="b g big" onclick="sesNext()">✅ Hecho — seguir la sesión →</button>':''}`}
+window.trapTap=(w,def)=>{spk('What does '+w+' mean?','en');
+ setTimeout(()=>alert('What does "'+w+'" mean?\n→ '+def),300);};
+let playing=false;
+window.playAll=async(ix,rate)=>{const s=STORIES[ix];if(playing){stopAll();return}
+ playing=true;stopBar(true);
+ for(const L of s.lines){ if(!playing)break;
+  if(hdOK('en')){await hdSpeak(L.en,'en',rate,(L.who&&SCASTHD[L.who])||null);}
+  else await new Promise(res=>{const u=new SpeechSynthesisUtterance(L.en);u.lang='en-US';
+   const v=(L.who&&SCAST[L.who])||pickVoice('en');if(v)u.voice=v;u.rate=rate;
+   let done=false;const fin=()=>{if(!done){done=true;res()}};
+   u.onend=fin;u.onerror=fin;setTimeout(fin,2500+L.en.length*120);speechSynthesis.speak(u);});
+  if(!playing)break;
+  await new Promise(r=>setTimeout(r,800));}
+ playing=false;stopBar(false);};
+// ================= CUENTOS (leer y escuchar) =================
+function enVoices(){return VOICES.filter(v=>v.lang.replace('_','-').toLowerCase().startsWith('en')).sort((a,b)=>vScore(b,'en-us')-vScore(a,'en-us'))}
+const isPremium=v=>/natural|neural|premium|enhanced|plus|hd\b/i.test(v.name);
+function voiceSelHTML(){let evs=enVoices().filter(v=>vScore(v,'en-us')>0);
+ if(!evs.length)return '';
+ // SOLO voces de grado premium; las de baja calidad no aparecen
+ const prem=evs.filter(isPremium);
+ let top,noPrem=false;
+ if(prem.length){top=prem.slice(0,8);
+  const fem=prem.find(v=>FEM_RE.test(v.name.toLowerCase())),mas=prem.find(v=>MASC_RE.test(v.name.toLowerCase()));
+  for(const g of [fem,mas])if(g&&!top.includes(g))top.push(g);
+ }else{top=evs.slice(0,2);noPrem=true} // sin premium en el equipo: mínimo para no quedar mudo
+ const tag=v=>FEM_RE.test(v.name.toLowerCase())?'👩 ':MASC_RE.test(v.name.toLowerCase())?'👨 ':'';
+ return `<select id="vsel" onchange="ST.voiceEN=this.value||null;save();spk('Hello! I am your new voice.','en')">
+  <option value="">🗣️ Voz: automática (👩 EE.UU., la mejor)</option>
+  ${top.map(v=>`<option value="${esc(v.name)}" ${ST.voiceEN===v.name?'selected':''}>${tag(v)}${esc(v.name.replace(/Microsoft |Google |com\.apple\.[a-z.]+/i,''))} · ${esc(v.lang)}</option>`).join('')}
+  ${noPrem?'<option disabled>⬇️ Instale voces Premium — vea ❓ Ayuda</option>':''}</select>`}
+function rateSlider(){const r=parseFloat(ST.rate)||0.95;
+ return `<span class="ratewrap">🐢<input type="range" id="rateSl" min="0.5" max="2" step="0.05" value="${r}"
+  oninput="ST.rate=parseFloat(this.value);save();const v=document.getElementById('rateVal');if(v)v.textContent=ST.rate.toFixed(2)+'×'"
+  onchange="spk('This is my reading speed.','en')">🐇<b id="rateVal">${r.toFixed(2)}×</b></span>`}
+function booksHome(){title('📖 Cuentos clásicos');
+ main.innerHTML=`${levelBar()}
+ <p class="center muted">Cuentos famosos en inglés — siga el texto con los ojos mientras escucha.
+ <button class="spk sm" onclick="spk('Escuche el cuento y siga el texto con los ojos. La frase que suena se pinta de amarillo. Puede repetir una parte, cambiar la velocidad y elegir la voz.','es')">🔊</button></p>
+ ${[['esopo','🦊 Fábulas de Esopo'],['hadas','🧚 Cuentos de hadas'],['arabes','🌙 Las mil y una noches'],['sabiduria','📜 Sabiduría — Talmud y más'],['clasicos','🏛️ Clásicos famosos']].map(([cat,head])=>{
+  const items=BOOKS.map((b,ix)=>[b,ix]).filter(([b])=>(b.cat||'clasicos')===cat);
+  if(!items.length)return '';
+  return `<p style="font-weight:800;font-size:19px;margin:20px 0 4px">${head} <small class="muted">(${items.length})</small></p>
+  <div class="list">${items.map(([b,ix])=>{const pos=ST.bookPos[b.id]||0;
+   return `<div class="litem" style="${b.lv!==ST.level?'opacity:.55':''}" onclick="go(bookScr,${ix})">
+   <span class="ico">${b.ico}</span><div class="tx"><b>${esc(b.tt)}</b><small>${esc(b.es)} · ${b.lv} · ${b.lines.length} frases${pos>0?' · 📍 frase '+(pos+1):''}</small></div>›</div>`}).join('')}
+  </div>`}).join('')}`}
+let bkES=false;
+function bookScr(ix){title('📖 '+BOOKS[ix].tt);
+ const s=BOOKS[ix],pos=ST.bookPos[s.id]||0;
+ RD.a=RD.story===ix?RD.a:null;RD.b=RD.story===ix?RD.b:null;RD.sel=0;RD.story=ix;
+ main.innerHTML=`
+ <div class="readbar">
+  <button class="b p" id="bkBtn" onclick="bkPlay(${ix})">▶️ ${pos>0?'Continuar':'Leer'}</button>
+  <button class="b" onclick="bkLoop(${ix})" id="loopBtn">${RD.a!=null?'🔁 Quitar sección':'🔁 Repetir sección'}</button>
+  ${rateSlider()}
+  ${voiceSelHTML()}
+  <button class="b" onclick="bkES=!bkES;go(bookScr,${ix})">${bkES?'ES ✓':'ES'}</button>
+  <button class="b" onclick="ST.notice=!ST.notice;save();go(bookScr,${ix})">${ST.notice?'🔍 ✓':'🔍'}</button>
+  <button class="b ${ST.hd?'w':''}" onclick="go(hdScr)">✨ HD</button>
+ </div>
+ <p class="center muted" id="bkHint" style="font-size:15px">Toque una frase para empezar desde allí 👆</p>
+ ${s.lines.map((L,li)=>`<div class="bline ${li===pos?'cur':''} ${RD.a===li?'mA':''} ${RD.b===li?'mB':''}" id="bl${li}" onclick="bkTap(${ix},${li})">
+   <span class="n">${li+1}</span>
+   <div class="txt">${noticeHL(esc(L.en))}${bkES?`<span class="es">${esc(L.es)}</span>`:''}</div>
+   <button class="spk sm" onclick="event.stopPropagation();spk('${esc(L.en).replace(/'/g,"\\'")}','en')">🔊</button>
+  </div>`).join('')}
+ <div class="card center"><p><b>Ahora usted 🗣️</b> — lea en voz alta y grábese</p>${recBar(s.lines[pos]?s.lines[pos].en:s.lines[0].en)}</div>
+ ${SES.on&&SES.stage===1?'<button class="b g big" onclick="sesNext()">✅ Hecho — seguir la sesión →</button>':''}`}
+function hiLine(ix,li){document.querySelectorAll('.bline').forEach(e=>e.classList.remove('cur'));
+ const e=document.getElementById('bl'+li);if(e){e.classList.add('cur');e.scrollIntoView({block:'center',behavior:'smooth'})}}
+function speakLine(text){
+ if(hdOK('en'))return hdSpeak(text,'en',ST.rate);
+ return new Promise(res=>{try{
+ const u=new SpeechSynthesisUtterance(text);u.lang='en-US';
+ const v=pickVoice('en');if(v)u.voice=v;u.rate=ST.rate||0.95;
+ let done=false;const fin=()=>{if(!done){done=true;res()}};
+ u.onend=fin;u.onerror=fin;setTimeout(fin,2500+text.length*120);
+ speechSynthesis.speak(u);}catch(e){res()}})}
+window.bkPlay=async(ix)=>{const s=BOOKS[ix],btn=document.getElementById('bkBtn');
+ if(RD.on){RD.on=false;speechSynthesis.cancel();stopHdAudio();stopBar(false);if(btn)btn.textContent='▶️ Continuar';return}
+ RD.on=true;stopBar(true);if(btn)btn.textContent='⏸️ Pausa';
+ let i=ST.bookPos[s.id]||0;
+ if(RD.a!=null&&RD.b!=null)i=(i>=RD.a&&i<=RD.b)?i:RD.a;
+ while(RD.on){
+  if(RD.a!=null&&RD.b!=null&&i>RD.b)i=RD.a;
+  if(i>=s.lines.length){ST.bookPos[s.id]=0;save();break}
+  hiLine(ix,i);ST.bookPos[s.id]=i;save();
+  try{speechSynthesis.cancel()}catch(e){}
+  await speakLine(s.lines[i].en);
+  if(!RD.on)break;
+  await new Promise(r=>setTimeout(r,700));
+  i++;}
+ RD.on=false;stopBar(false);const b2=document.getElementById('bkBtn');if(b2)b2.textContent='▶️ Continuar';};
+window.bkTap=(ix,li)=>{const s=BOOKS[ix];
+ if(RD.sel===1){RD.a=li;RD.sel=2;document.getElementById('bl'+li).classList.add('mA');
+  document.getElementById('bkHint').textContent='Ahora toque la ÚLTIMA frase de la sección 👆';return}
+ if(RD.sel===2){if(li<RD.a){RD.b=RD.a;RD.a=li}else RD.b=li;RD.sel=0;
+  ST.bookPos[s.id]=RD.a;save();go(bookScr,ix);bkPlay(ix);return}
+ ST.bookPos[s.id]=li;save();hiLine(ix,li);
+ if(!RD.on)speak(s.lines[li].en,'en');};
+window.bkLoop=(ix)=>{if(RD.a!=null){RD.a=null;RD.b=null;RD.sel=0;go(bookScr,ix);return}
+ RD.sel=1;document.getElementById('bkHint').textContent='Toque la PRIMERA frase de la sección 👆';
+ document.getElementById('loopBtn').textContent='👆 eligiendo…';};
+// ================= ✨ VOZ HD — pantalla de gestión =================
+function fmtMB(b){return b?Math.round(b/1048576)+' MB':'~60 MB'}
+async function hdScr(){title('✨ Voz HD');
+ main.innerHTML='<div class="card center"><p>⏳ Preparando el motor de voz…</p></div>';
+ const ok=await hdInit();
+ if(!ok){main.innerHTML=`<div class="card center"><p style="font-size:40px">📶</p>
+  <p><b>Para preparar la Voz HD se necesita internet una vez.</b></p>
+  <p class="muted">Conéctese a wifi y vuelva a intentar. Después funciona sin internet para siempre.</p>
+  <button class="b p big" onclick="go(hdScr)">Reintentar</button></div>`;return}
+ if(navigator.onLine&&!Object.keys(HD.sizes).length){
+  try{const vs=await HD.lib.voices();for(const v of vs){const f=Object.entries(v.files).find(([k])=>k.endsWith('.onnx'));
+   if(f)HD.sizes[v.key]=f[1].size_bytes}}catch(e){}}
+ const row=v=>{const has=HD.stored.includes(v.id);
+  const isDef=(v.l==='en'?ST.hdVoiceEN:ST.hdVoiceES)===v.id;
+  return `<div class="hdrow">
+   <span style="font-size:26px">${v.g}</span><span class="nm">${esc(v.name)}</span>
+   ${has?`<button class="b" onclick="hdTry('${v.id}','${v.l}')">▶️ Probar</button>
+    <button class="b ${isDef?'g':''}" onclick="hdUse('${v.id}','${v.l}')">${isDef?'✓ En uso':'Usar'}</button>
+    <button class="b" onclick="hdDel('${v.id}')">🗑</button>`
+   :`<button class="b p" id="dl-${v.id}" onclick="hdDl('${v.id}')">⬇️ Descargar ${fmtMB(HD.sizes[v.id])}</button><span class="pg" id="pg-${v.id}"></span>`}
+  </div>`};
+ main.innerHTML=`
+ <p class="center muted">Voces neuronales de alta calidad, dentro de la app.<br>Se descargan UNA vez (con wifi) y quedan en su teléfono para siempre — sin internet.
+ <button class="spk sm" onclick="spk('Estas voces de alta calidad se descargan una sola vez con wifi. Después funcionan sin internet, para siempre. Elija una voz de inglés y una de español.','es')">🔊</button></p>
+ <div class="card"><label style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px">
+  <input type="checkbox" style="width:26px;height:26px" ${ST.hd?'checked':''}
+   onchange="ST.hd=this.checked;save();if(ST.hd)hdInit()"> Usar Voz HD ✨</label>
+  <p class="muted" style="font-size:15px">Apagado = voz normal del teléfono. La primera frase puede tardar 1–2 segundos (el cerebro de la voz está pensando).</p></div>
+ <p style="font-weight:800;margin:14px 0 2px">🇺🇸 Inglés</p>
+ ${HD_VOICES.filter(v=>v.l==='en').map(row).join('')}
+ <p style="font-weight:800;margin:14px 0 2px">🇲🇽 Español (instrucciones)</p>
+ ${HD_VOICES.filter(v=>v.l==='es').map(row).join('')}
+ <p class="note">💾 Cada voz ocupa 20–65 MB. Con 1 de inglés + 1 de español ya se nota la diferencia. Puede borrar las que no use.</p>`}
+window.hdDl=async(id)=>{const btn=document.getElementById('dl-'+id),pg=document.getElementById('pg-'+id);
+ if(btn){btn.disabled=true;btn.textContent='⬇️ Bajando…'}
+ try{await HD.lib.download(id,p=>{if(pg)pg.textContent=Math.round(p.loaded/p.total*100)+'%'});
+  HD.stored=await HD.lib.stored();
+  if(!ST.hd){ST.hd=true;save()}
+  const v=HD_VOICES.find(x=>x.id===id);
+  if(v){if(v.l==='en'&&!ST.hdVoiceEN){ST.hdVoiceEN=id}if(v.l==='es'&&!ST.hdVoiceES){ST.hdVoiceES=id}save()}
+  go(hdScr)}
+ catch(e){alert('No se pudo descargar. Revise el internet e intente de nuevo.');go(hdScr)}};
+window.hdUse=(id,l)=>{if(l==='en')ST.hdVoiceEN=id;else ST.hdVoiceES=id;save();go(hdScr)};
+window.hdDel=async(id)=>{try{await HD.lib.remove(id)}catch(e){}
+ HD.stored=HD.stored.filter(x=>x!==id);
+ if(ST.hdVoiceEN===id)ST.hdVoiceEN=null;if(ST.hdVoiceES===id)ST.hdVoiceES=null;save();go(hdScr)};
+window.hdTry=(id,l)=>{hdSpeak(l==='en'?'Hello! I will read your stories with this voice.':'¡Hola! Yo voy a leer contigo. ¿Le gusta mi voz?',l,null,id)};
+// ================= AYUDA =================
+function helpScr(){title('❓ Ayuda');
+ main.innerHTML=`
+ <div class="card"><b>📲 Instalar (gratis, una sola vez)</b>
+  <p>1. Abra esta página con internet (iglesia, escuela, plaza con wifi).<br>
+  2. <b>Android (Chrome):</b> menú ⋮ → “Agregar a pantalla de inicio”.<br>
+  <b>iPhone (Safari):</b> botón compartir □↑ → “Agregar a inicio”.<br>
+  3. ¡Listo! Después funciona <b>SIN internet</b>, para siempre.</p></div>
+ <div class="card"><b>✨ Voz HD (nueva — la mejor calidad)</b>
+  <p>Voces neuronales DENTRO de la app: se bajan una vez con wifi y funcionan sin internet para siempre. 3 voces de inglés y 3 de español (👩👩👨).</p>
+  <button class="b p big" onclick="go(hdScr)">✨ Activar / administrar Voz HD</button></div>
+ <div class="card"><b>🔊 Para una voz MÁS BONITA (opción B: voces del teléfono)</b>
+  <p>La app usa las voces de su teléfono y elige la mejor automáticamente. Para mejorarla (una vez, con internet):<br>
+  <b>Android:</b> Ajustes → Sistema → Idioma → Salida de texto a voz → Motor de Google → Instalar datos de voz → <b>English (US)</b>: elija la voz de mejor calidad. Después funciona sin internet.<br>
+  <b>iPhone:</b> Ajustes → Accesibilidad → Contenido hablado → Voces → English → descargue una voz <b>Mejorada/Premium</b> (ej. Samantha, Ava, Daniel).<br>
+  Luego, en 📖 Cuentos puede elegir la voz que más le guste (hombre o mujer).</p></div>
+ <div class="card"><b>🎙️ Hablar</b>
+  <p>Grabe su voz y compárela con la voz nativa — funciona sin internet.<br>
+  El botón 🎤 “Hablar y comparar” (nota automática) solo aparece cuando hay internet.</p></div>
+ <div class="card"><b>👩‍🏫 Para profesores</b>
+  <p>Método: frases completas, sin términos de gramática · oído primero, letras después · transferencia del español (cognados, comí→ate) · SOS: silencio = perder · corrección: 1 por frase.<br>
+  Ruta sugerida: SOS → Palabras A1 → Verbos (de arriba hacia abajo) → Historias del nivel → Batalla de velocidad como examen.</p></div>
+ <div class="card"><b>🔒 Privacidad</b><p>Todo queda en este teléfono. No se envía nada a internet.</p></div>`}
+// ================= NÚCLEO: SRS — el repaso es aprendizaje =================
+const DAYMS=864e5, dayNum=()=>Math.floor(Date.now()/DAYMS);
+const IV=[0,1,3,7,30]; // cajas: hoy→1d→3d→1sem→1mes
+function gradeItem(key,ok,tag){
+ const r=ST.srs[key]||(ST.srs[key]={b:0,d:dayNum(),n:0,w:0,fs:0});
+ r.n++;
+ if(ok){r.b=Math.min(4,r.b+1);r.d=dayNum()+IV[r.b];
+  if(r.w>0&&!r.fx){if(r.lod!==dayNum()){r.fs=(r.fs||0)+1;r.lod=dayNum()}
+   if(r.fs>=3){r.fx=1}} // error vencido: 3 aciertos en días distintos
+ }else{r.b=0;r.d=dayNum();r.w++;r.fs=0;if(tag)r.t=tag}
+ if(SES.on&&!SES.keys.includes(key))SES.keys.push(key);
+ save()}
+function track(bucket,ok){const a=ST.acc[bucket]||(ST.acc[bucket]=[]);
+ a.push(ok?1:0);if(a.length>20)a.shift();save()}
+function accOf(b){const a=ST.acc[b]||[];return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function nOf(b){return (ST.acc[b]||[]).length}
+const IMP={s:5,p:4,vb:4,lv:4,be:4,wq:4,f:3,sp:3,sn:3,su:2,v:2}; // importancia por tipo
+function dueList(){const today=dayNum();
+ return Object.entries(ST.srs).filter(([k,r])=>r.d<=today)
+ .sort((x,y)=>{const a=x[1],b=y[1];
+  return ((b.w*2+(4-b.b))*(IMP[y[0].split('|')[0]]||1))-((a.w*2+(4-a.b))*(IMP[x[0].split('|')[0]]||1))})
+ .map(([k])=>k)}
+// ZPD: nº de opciones según precisión (60%↓ → 3 opciones)
+function optN(bucket){const a=accOf(bucket);return (a!==null&&nOf(bucket)>=8&&a<0.6)?3:4}
+function zpdHint(bucket){const a=accOf(bucket);if(a===null||nOf(bucket)<10)return '';
+ if(a>=0.9)return '🌟 Esto ya es fácil para usted — pruebe el siguiente nivel.';
+ if(a<0.6)return '💙 Vamos con calma — ir despacio NO es ir mal. Repita el nivel anterior si quiere.';
+ return ''}
+// ================= constructores de preguntas =================
+const spkBtn=(t,l,r)=>`<button class="spk sm" onclick="event.stopPropagation();spk('${esc(t).replace(/'/g,"\\'")}','${l}'${r?(','+r):''})">🔊</button>`;
+function qVocab(w){const pool=VOCAB.filter(v=>v.l===w.l&&v.en!==w.en);
+ const n=optN('vocab-'+w.l);
+ return{pr:`<p class="muted">¿Cómo se dice en inglés?</p><p class="bigword es" style="font-size:30px">${esc(w.es)} ${spkBtn(w.es,'es')}</p>`,
+  opts:shuf([{label:w.en+'  ·'+w.p,ok:true},...shuf(pool).slice(0,n-1).map(d=>({label:d.en+'  ·'+d.p,ok:false}))]),
+  key:'v|'+w.en,bucket:'vocab-'+w.l,tag:'vocabulario',say:w.en}}
+function qFF(f){const other=rnd(FF.filter(x=>x.es!==f.es));
+ return{pr:`<p class="muted">⚠️ En inglés, “${esc(f.es)}” se dice…</p><p class="bigword es" style="font-size:28px">${esc(f.es)} ${spkBtn(f.es,'es')}</p>`,
+  opts:shuf([{label:f.esEn,ok:true},{label:f.en,ok:false},{label:other.esEn,ok:false}]),
+  key:'f|'+f.es,bucket:'ff',tag:'falso amigo',say:f.esEn}}
+const PREP_RE=/\b(TO|AT|FOR|ON|IN|ABOUT|OF|WITH|FROM)\b/;
+const PREP_POOL=['to','at','for','on','in','about','of','with','from'];
+function qPrep(p){const gap=p.en.replace(PREP_RE,'___');
+ const opts=PREP_POOL.filter(o=>o!==p.key);
+ return{pr:`<p class="muted">${esc(p.es)} ${spkBtn(p.es,'es')}</p><p class="bigword en" style="font-size:26px">${esc(gap)}</p>`,
+  opts:shuf([{label:p.key.toUpperCase(),ok:true},...shuf(opts).slice(0,3).map(o=>({label:o.toUpperCase(),ok:false}))]),
+  key:'p|'+p.en,bucket:'preps',tag:'preposición pegada',say:p.en.toLowerCase()}}
+function qSOS(cardN){const sit=rnd(SOS_SIT.filter(s=>s.card===cardN))||rnd(SOS_SIT);
+ const c=SOS.find(c=>c.n===sit.card);
+ const dis=shuf(SOS.filter(x=>x.n!==sit.card)).slice(0,3);
+ return{pr:`<p class="muted">Situación ${spkBtn(sit.cue,'es')}</p><p style="font-size:18px;font-weight:700">${esc(sit.cue)}</p>`,
+  opts:shuf([{label:c.en,ok:true},...dis.map(d=>({label:d.en,ok:false}))]),
+  key:'s|'+sit.card,bucket:'sos',tag:'SOS',say:c.en,sayPr:{t:sit.cue,l:'es'}}}
+function unlockedSlots(){const ord={A1:1,A2:2,B1:3,B2:4},cur=ord[ST.level];
+ return SLOTS.filter(s=>s.id!=='quiero'&&ord[s.lv]<=cur).map(s=>s.id)}
+function qVerb(slotId){const it=makeItem(slotId);const right=fullEN(it);
+ let alt1;for(let k=0;k<10;k++){alt1=makeItem(slotId);if(fullEN(alt1)!==right)break}
+ const others=unlockedSlots().filter(s=>s!==slotId);
+ let alt2;for(let k=0;k<10;k++){alt2=makeItem(others.length?rnd(others):slotId);if(fullEN(alt2)!==right&&fullEN(alt2)!==fullEN(alt1))break}
+ return{pr:`<p class="muted">¿Cómo se arma? <small>(${esc(it.hint)})</small></p><p class="bigword es" style="font-size:28px">${esc(it.es)} ${spkBtn(it.es,'es')}</p>`,
+  opts:shuf([{label:right,ok:true},{label:fullEN(alt1),ok:false},{label:fullEN(alt2),ok:false}]),
+  key:'vb|'+slotId,bucket:'verbs-'+slotId,tag:'tiempo verbal',say:right}}
+function qSpeed(it){const match=Math.random()<0.55;let shown=it.en;
+ if(!match){let w;do{w=rnd(SPEED)}while(w.en===it.en);shown=w.en}
+ return{pr:`<p class="muted">¿La traducción es correcta?</p><p class="bigword es" style="font-size:24px">${esc(it.es)}</p><p style="margin:4px 0">⬇️</p><p class="bigword en" style="font-size:22px">${esc(shown)} ${spkBtn(shown,'en')}</p>`,
+  opts:match?[{label:'✅ Correcta',ok:true},{label:'❌ Está mal',ok:false}]:[{label:'✅ Correcta',ok:false},{label:'❌ Está mal',ok:true}],
+  key:'sp|'+it.es,bucket:'speed',tag:'velocidad',say:it.en,
+  after:match?'':'La buena: '+it.en}}
+function qLVC(it){const full=it.v+' '+it.n;
+ let verbs=[it.v];if(it.err&&!verbs.includes(it.err))verbs.push(it.err);
+ for(const v of shuf(LVC_VERBS)){if(verbs.length>=4)break;if(!verbs.includes(v))verbs.push(v)}
+ return{pr:`<p class="muted">¿Qué verbo comodín? <small>(${esc(it.es)})</small></p>
+  <p class="bigword en" style="font-size:28px">___ ${esc(it.n)} <span class="pos">${esc(it.pos)}</span></p>`,
+  opts:shuf(verbs.map(v=>({label:v,ok:v===it.v}))),
+  key:'lv|'+full,bucket:'lvc',tag:'verbo comodín',say:full,
+  after:it.err?`⚠️ Tu español te engaña: aquí NO es "${it.err}". Es: ${full}.`:`Es: ${full}.`}}
+function qBe(it){it=it||rnd(BE_DRILL);
+ const dis=shuf(BE_DRILL.filter(x=>x.en!==it.en)).slice(0,2);
+ return{pr:`<p class="muted">ser y estar → UN solo verbo</p><p class="bigword es" style="font-size:26px">${esc(it.es)} ${spkBtn(it.es,'es')}</p>`,
+  opts:shuf([{label:it.en,ok:true},...dis.map(d=>({label:d.en,ok:false}))]),
+  key:'be|'+it.es,bucket:'verbs-be',tag:'ser/estar → be',say:it.en}}
+function qWant(it){it=it||rnd(WANT_DRILL);
+ const dis=shuf(WANT_DRILL.filter(x=>x.en!==it.en)).slice(0,2);
+ return{pr:`<p class="muted">🎉 sin subjuntivo: want + persona + to</p><p class="bigword es" style="font-size:24px">${esc(it.es)} ${spkBtn(it.es,'es')}</p>`,
+  opts:shuf([{label:it.en,ok:true},...dis.map(d=>({label:d.en,ok:false}))]),
+  key:'wq|'+it.es,bucket:'verbs-quiero',tag:'want…to',say:it.en}}
+function qSound(p){const target=Math.random()<0.5?p.a:p.b;
+ return{pr:`<p class="muted">👂 ¿Cuál escuchó? ${spkBtn(target,'en','0.9')}</p><p class="muted" style="font-size:14px">${esc(p.tip)}</p>`,
+  opts:shuf([{label:p.a+' — '+p.ga,ok:target===p.a},{label:p.b+' — '+p.gb,ok:target===p.b}]),
+  key:'sn|'+p.a+'/'+p.b,bucket:'sonidos',tag:'pronunciación',say:target,
+  sayPr:{t:target,l:'en'},review:{pair:p,target}}}
+function qFromKey(key){const[t,...rest]=key.split('|');const id=rest.join('|');
+ try{
+  if(t==='v'){const w=VOCAB.find(v=>v.en===id);return w?qVocab(w):null}
+  if(t==='lv'){const it=LVC.find(x=>x.v+' '+x.n===id);return it?qLVC(it):null}
+  if(t==='be'){const it=BE_DRILL.find(x=>x.es===id);return it?qBe(it):null}
+  if(t==='wq'){const it=WANT_DRILL.find(x=>x.es===id);return it?qWant(it):null}
+  if(t==='sn'){const[a,b]=id.split('/');const p=MINPAIRS.find(x=>x.a===a&&x.b===b);return p?qSound(p):null}
+  if(t==='f'){const f=FF.find(x=>x.es===id);return f?qFF(f):null}
+  if(t==='p'){const p=PREPS.find(x=>x.en===id);return p?qPrep(p):null}
+  if(t==='s'){return qSOS(parseInt(id))}
+  if(t==='vb'){return qVerb(id)}
+  if(t==='sp'){const it=SPEED.find(x=>x.es===id);return it?qSpeed(it):null}
+  if(t==='su'){const it=SUENA.find(x=>x.en===id);if(!it)return null;
+   return{pr:`<p class="muted">👂 ¿Suena bien o mal?</p><p class="bigword en" style="font-size:22px">${esc(it.en)} ${spkBtn(it.en,'en','0.85')}</p>`,
+    opts:it.ok?[{label:'😊 Suena BIEN',ok:true},{label:'😖 Suena MAL',ok:false}]:[{label:'😊 Suena BIEN',ok:false},{label:'😖 Suena MAL',ok:true}],
+    key:key,bucket:'suena',tag:'oído',say:it.ok?it.en:null,after:it.ok?'':(it.why||'')}}
+ }catch(e){}
+ return null}
+// ================= corredor de quiz genérico =================
+let GQ=null;
+function runQuiz(items,title_,onDone){GQ={i:0,ok:0,items:items.filter(Boolean),tt:title_,done:onDone,qt:Date.now(),times:[],brk:false};gqScr()}
+function gqScr(){const q=GQ.items[GQ.i];
+ if(!q){const r={ok:GQ.ok,n:GQ.items.length};GQ.done(r);return}
+ GQ.qt=Date.now();
+ if(q.sayPr)spk(q.sayPr.t,q.sayPr.l);
+ main.innerHTML=`${GQ.tt?`<p class="center muted" style="font-weight:700">${GQ.tt}</p>`:''}
+ <div class="progress"><div style="width:${GQ.i/GQ.items.length*100}%"></div></div>
+ <div class="card center">${q.pr}</div>
+ ${q.opts.map((o,oi)=>`<button class="opt" onclick="gqAns(this,${o.ok?'true':'false'})">${esc(o.label)}</button>`).join('')}
+ <div id="gqFb"></div>`}
+window.gqAns=(btn,ok)=>{if(GQ.locked)return;GQ.locked=true;
+ const q=GQ.items[GQ.i];
+ GQ.times.push(Date.now()-GQ.qt);
+ btn.classList.add(ok?'ok':'no');if(ok)GQ.ok++;
+ if(!ok){const bs=document.querySelectorAll('.opt');let oi=0;
+  for(const o of q.opts){if(o.ok)bs[oi].classList.add('ok');oi++}}
+ gradeItem(q.key,ok,q.tag);track(q.bucket,ok);
+ if(!ok&&q.after)document.getElementById('gqFb').innerHTML=`<div class="note w">👂 ${esc(q.after)}</div>`;
+ const next=()=>{GQ.i++;GQ.locked=false;
+  // detección de fatiga: últimas 3 respuestas 30% más lentas que las primeras 3
+  if(!GQ.brk&&GQ.times.length>=6){const m=a=>a.reduce((x,y)=>x+y,0)/a.length;
+   if(m(GQ.times.slice(-3))>1.35*m(GQ.times.slice(0,3))&&m(GQ.times.slice(-3))>4000){GQ.brk=true;
+    main.innerHTML=`<div class="card center"><p style="font-size:46px">💧</p><p><b>Su cerebro pide un descanso.</b></p>
+    <p class="muted">5 minutos. Agua, estirarse, respirar. El descanso TAMBIÉN es aprender.</p>
+    <button class="b p big" onclick="gqScr()">Seguir →</button></div>`;return}}
+  gqScr()};
+ if(q.review){ // pares de sonido: comparar con calma, avanzar a mano
+  const p=q.review.pair,t=q.review.target;
+  document.getElementById('gqFb').innerHTML=`
+   <div class="note">${ok?'✅':'❌'} Sonó: <b>${esc(t)}</b> — vuelva a escuchar la diferencia:</div>
+   <div class="row">
+    <button class="b ${t===p.a?'g':''}" onclick="spk('${esc(p.a)}','en',0.85)">🔊 ${esc(p.a)} — ${esc(p.ga)}${t===p.a?' ✓':''}</button>
+    <button class="b ${t===p.b?'g':''}" onclick="spk('${esc(p.b)}','en',0.85)">🔊 ${esc(p.b)} — ${esc(p.gb)}${t===p.b?' ✓':''}</button>
+    <button class="b" onclick="spk('${esc(p.a)}... ${esc(p.b)}.','en',0.8)">🔊 los dos</button>
+   </div>
+   <div class="row"><button class="b p big" onclick="gqNext()">Siguiente →</button></div>`;
+  window.gqNext=next;spk(t,'en',0.85);return}
+ if(q.say)speakThen(q.say,'en',null,ok?700:1400,next);else setTimeout(next,ok?700:1600)};
+// ================= MAPA de comprensión (vector, no nota) =================
+const AREAS=[
+ ['vocab','📚 Palabras',()=>'vocab-'+ST.level,()=>go(vQuiz)],
+ ['verbs','⚙️ Verbos',()=>{const ss=unlockedSlots().map(s=>'verbs-'+s).filter(b=>nOf(b)>0);return ss},()=>go(verbsHome)],
+ ['lvc','🃏 Comodín',()=>'lvc',()=>go(lvcHome)],
+ ['sonidos','🔉 Sonidos',()=>'sonidos',()=>go(sonidosHome)],
+ ['sos','🆘 SOS',()=>'sos',()=>go(sosFire)],
+ ['preps','🔗 Palabritas',()=>'preps',()=>go(prepScr)],
+ ['ff','🪤 Falsos amigos',()=>'ff',()=>go(ffQuiz)],
+ ['speed','🏁 Velocidad',()=>'speed',()=>go(speedScr)],
+ ['suena','👂 Oído',()=>'suena',()=>go(suenaScr)]];
+function areaAcc(spec){const b=spec[2]();
+ if(Array.isArray(b)){if(!b.length)return null;
+  let s=0,n=0;for(const x of b){const a=accOf(x);if(a!==null){s+=a*nOf(x);n+=nOf(x)}}
+  return n?{a:s/n,n}:null}
+ const a=accOf(b);return a===null?null:{a,n:nOf(b)}}
+function mapHTML(){let rows='',worst=null;
+ for(const spec of AREAS){const r=areaAcc(spec);
+  if(r===null){rows+=`<div class="gauge"><span class="gl">${spec[1]}</span><div class="gb"><div style="width:0"></div></div><span class="gp">—</span></div>`;continue}
+  const pct=Math.round(r.a*100),col=r.a>=0.85?'#15803d':r.a>=0.6?'#b45309':'#b91c1c';
+  rows+=`<div class="gauge"><span class="gl">${spec[1]}</span><div class="gb"><div style="width:${pct}%;background:${col}"></div></div><span class="gp">${pct}%</span></div>`;
+  if(r.n>=5&&(!worst||r.a<worst.a))worst={a:r.a,spec}}
+ const due=dueList().length;
+ let next='';
+ if(due>0)next=`<div class="nextact" onclick="startPrimeOnly()"><span style="font-size:26px">🔁</span><div><b>Siguiente: repasar ${Math.min(due,8)} cosas</b><br><small class="muted">El repaso de hoy vale el doble que lo nuevo</small></div><span style="margin-left:auto">›</span></div>`;
+ else if(worst&&worst.a<0.85)next=`<div class="nextact" onclick="NEXTGO()"><span style="font-size:26px">🎯</span><div><b>Siguiente: ${worst.spec[1]}</b><br><small class="muted">Su zona de crecimiento ahora mismo</small></div><span style="margin-left:auto">›</span></div>`;
+ if(worst)window.NEXTGO=worst.spec[3];
+ return `<div class="card"><b>🗺️ Mi mapa</b> <small class="muted">— no es una nota, es dónde está usted hoy</small>${rows}${next}</div>`}
+window.startPrimeOnly=()=>{const items=dueList().slice(0,8).map(qFromKey).filter(Boolean);
+ if(!items.length){alert('¡Nada pendiente! 🎉');return}
+ stack.push([()=>{},[]]);
+ runQuiz(items,'🔁 Repaso',r=>{main.innerHTML=`<div class="card center"><p style="font-size:46px">${r.ok>=r.n*0.75?'🌟':'💪'}</p>
+  <p class="score">${r.ok}/${r.n}</p><p class="muted">Lo difícil volverá pronto — así funciona la memoria.</p>
+  <button class="b p big" onclick="go(home)">Inicio</button></div>`})};
+// ================= MI CAMINO — 24 etapas =================
+function etapaDef(){return ETAPAS[Math.min(ST.etapa,ETAPAS.length-1)]}
+function focusBucket(f){if(f.startsWith('slot:'))return 'verbs-'+f.slice(5);
+ return {lvc:'lvc',sos:'sos',preps:'preps',ff:'ff',suena:'suena',speed:'speed',sonidos:'sonidos',be:'verbs-be',want:'verbs-quiero'}[f]||('vocab-'+ST.level)}
+function focusQ(f){
+ if(f.startsWith('slot:'))return qVerb(f.slice(5));
+ if(f==='lvc')return qLVC(rnd(LVC.filter(x=>x.cat!=='A')));
+ if(f==='sos')return qSOS(rnd(SOS.filter(c=>!c.aux)).n);
+ if(f==='preps')return qPrep(rnd(PREPS));
+ if(f==='ff')return qFF(rnd(FF));
+ if(f==='speed')return qSpeed(rnd(SPEED));
+ if(f==='suena')return qFromKey('su|'+rnd(SUENA).en);
+ if(f==='sonidos')return qSound(rnd(MINPAIRS));
+ if(f==='be')return qBe();
+ if(f==='want')return qWant();
+ return qVocab(rnd(VOCAB.filter(v=>v.l===ST.level)))}
+function focusQs(n){const e=etapaDef(),out=[];
+ for(let i=0;i<n;i++)out.push(focusQ(e.focus[i%e.focus.length]));
+ return out}
+function etapaReady(){const e=etapaDef();if(ST.etapaSes<2)return false;
+ const b=focusBucket(e.focus[0]),a=accOf(b);
+ return a!==null&&nOf(b)>=8&&a>=0.75}
+window.advEtapa=()=>{if(ST.etapa<ETAPAS.length-1){ST.etapa++;ST.etapaSes=0;
+ ST.level=ETAPAS[ST.etapa].lv;save()}
+ go(caminoScr)};
+window.setEtapa=(i)=>{ST.etapa=i;ST.etapaSes=0;ST.level=ETAPAS[i].lv;save();go(caminoScr)};
+function caminoScr(){title('🧭 Mi camino');
+ const names={A1:'A1 · Sobrevivir',A2:'A2 · Funcionar',B1:'B1 · Conectar',B2:'B2 · Matizar'};
+ main.innerHTML=`<p class="center muted">24 etapas, sin candados — el camino recomienda, usted manda.
+ <button class="spk sm" onclick="spk('Este es su camino: veinticuatro etapas, de sobrevivir a matizar. Cada etapa tiene una meta que se puede hacer, no un examen. Toque cualquier etapa para ir allí.','es')">🔊</button></p>
+ ${['A1','A2','B1','B2'].map(lv=>`
+  <p style="font-weight:800;font-size:19px;margin:18px 0 4px">${names[lv]}</p>
+  <div class="list">${ETAPAS.map((e,i)=>[e,i]).filter(([e])=>e.lv===lv).map(([e,i])=>{
+   const cur=i===ST.etapa,done=i<ST.etapa;
+   return `<div class="litem" style="${cur?'border:2px solid var(--brand);background:#eff6ff':''}" onclick="setEtapa(${i})">
+    <span class="ico">${done?'✅':cur?'🔵':'⚪'}</span>
+    <div class="tx"><b>${i+1}. ${esc(e.tt)}</b><small>Meta: ${esc(e.can)}${cur?' · sesiones aquí: '+ST.etapaSes:''}</small></div>›</div>`}).join('')}
+  </div>`).join('')}
+ <p class="note">La etapa se considera lista con 2+ sesiones y 75% en su enfoque — pero repetirla nunca es perder. Ir despacio NO es ir mal.</p>`}
+// ================= SONIDOS — pares mínimos =================
+function sonidosHome(){title('🔉 Sonidos');
+ main.innerHTML=`<p class="center muted">Dos palabras casi iguales — el oído decide.
+ <button class="spk sm" onclick="spk('Va a escuchar una palabra. Dos opciones se parecen mucho. Trucos: para la be y la uve, los dientes tocan el labio. Para la zeta, la garganta vibra: ponga la mano en el cuello. Para la hache, un soplo suave.','es')">🔊</button></p>
+ <div class="card"><b>Trucos con la mano</b>
+  <p style="font-size:16px">🖐️ <b>v</b>: dientes en el labio (very ≠ berry) · ✋ <b>z</b>: mano al cuello, vibra (prize) ·
+  💨 <b>p/h</b>: soplo en la palma · 👄 <b>sh</b> sopla largo, <b>ch</b> explota</p></div>
+ <button class="b p big" onclick="sndRound()">👂 Empezar — 12 pares</button>`}
+window.sndRound=()=>{runQuiz(shuf(MINPAIRS).slice(0,12).map(qSound),'🔉 ¿Cuál escuchó?',r=>{
+ const hint=zpdHint('sonidos');
+ main.innerHTML=`<div class="card center"><p style="font-size:46px">${r.ok>=10?'🌟':r.ok>=8?'💪':'👂'}</p>
+ <p class="score">${r.ok}/${r.n}</p>
+ <p class="muted">El oído se entrena por días, no por horas — vuelva mañana.</p>
+ ${hint?`<p class="note">${hint}</p>`:''}
+ <button class="b p big" onclick="sndRound()">Otra ronda</button></div>`})};
+// ================= SESIÓN DE HOY — CORE Loop =================
+const STAGES=[['PRIME','🔁 Recordar','2 min'],['FLOOD','🎧 Escuchar','10 min'],['RETRIEVE','🧠 Sacar','6 min'],['PUSH','🗣️ Hablar','8 min'],['REFLECT','🪞 Mirar atrás','4 min']];
+// 한 줄짜리 단계 표시 — 화면을 차지하지 않는다
+function sesDots(){const cur=STAGES[SES.stage];
+ return `<div class="sline">${STAGES.map((s,i)=>`<span class="sstep ${i<SES.stage?'done':i===SES.stage?'cur':''}">${s[1].split(' ')[0]}</span>`).join('<span class="sarrow">›</span>')}<span class="scur">${cur?esc(cur[1].split(' ').slice(1).join(' '))+' · '+cur[2]:''}</span></div>`}
+function sesToday(){return ST.reflect.length&&ST.reflect[ST.reflect.length-1].date===new Date().toDateString()}
+function sesStart(){SES.on=true;SES.stage=0;SES.keys=[];SES.primeAcc=null;SES.retAcc=null;SES.t0=Date.now();go(sesScr)}
+window.sesNext=()=>{SES.stage++;go(sesScr)};
+function sesScr(){title('🔄 Sesión de hoy');
+ if(!SES.on||SES.stage<0){sesStart();return}
+ const st=SES.stage;
+ if(st===0){ // PRIME
+  const items=dueList().slice(0,8).map(qFromKey).filter(Boolean);
+  if(!items.length){main.innerHTML=`${sesDots()}<div class="card center"><p style="font-size:40px">🌱</p>
+   <p><b>Primer día — todavía no hay nada que repasar.</b></p><p class="muted">Desde mañana, la sesión empieza recordando lo de ayer. Así se construye la memoria.</p>
+   <button class="b p big" onclick="sesNext()">🎧 A escuchar →</button></div>`;return}
+  runQuiz(items,sesDots()+'🔁 Antes de lo nuevo: lo de ayer',r=>{SES.primeAcc=r.n?r.ok/r.n:null;
+   main.innerHTML=`${sesDots()}<div class="card center"><p class="score">${r.ok}/${r.n}</p>
+   <p class="muted">Sacarlo de la memoria ES el aprendizaje — no releer.</p>
+   <button class="b p big" onclick="sesNext()">🎧 A escuchar →</button></div>`});return}
+ if(st===1){ // FLOOD — la etapa elige qué escuchar
+  const e=etapaDef();
+  let si=null,bi=null;
+  if(e.st&&e.st.length){const id=rnd(e.st);si=STORIES.findIndex(s=>s.id===id)}
+  if(e.bk&&e.bk.length){const id=rnd(e.bk);bi=BOOKS.findIndex(b=>b.id===id)}
+  if(si===null||si<0){const p=STORIES.map((s,i)=>i).filter(i=>STORIES[i].lv===ST.level);si=p.length?rnd(p):0}
+  if(bi===null||bi<0){const p=BOOKS.map((b,i)=>i).filter(i=>BOOKS[i].lv===ST.level);bi=p.length?rnd(p):0}
+  main.innerHTML=`${sesDots()}
+  <p class="center muted"><b>Etapa ${ST.etapa+1}: ${esc(e.tt)}</b><br>Escuche primero SIN leer. Luego con texto. 🔍 para notar las formas.</p>
+  <div class="list">
+   <div class="litem" onclick="go(storyScr,${si})"><span class="ico">${STORIES[si].ico||'🎧'}</span><div class="tx"><b>${esc(STORIES[si].tt)}</b><small>historia · ${STORIES[si].lv}</small></div>›</div>
+   <div class="litem" onclick="go(bookScr,${bi})"><span class="ico">${BOOKS[bi].ico}</span><div class="tx"><b>${esc(BOOKS[bi].tt)}</b><small>cuento · ${BOOKS[bi].lv}</small></div>›</div>
+  </div>
+  <div class="row" style="margin-top:14px"><button class="b g big" onclick="sesNext()">✅ Ya escuché — a sacar →</button></div>`;return}
+ if(st===2){ // RETRIEVE = 4 del enfoque de la etapa + 8 mezcladas (lo nuevo SIEMPRE con lo viejo)
+  const foco=focusQs(4);
+  const mix=[qVocab(rnd(VOCAB.filter(v=>v.l===ST.level))),qVocab(rnd(VOCAB.filter(v=>v.l===ST.level))),
+   qVerb(rnd(unlockedSlots())),qPrep(rnd(PREPS)),qSOS(rnd(SOS.filter(c=>!c.aux)).n),
+   qFF(rnd(FF)),qFromKey('su|'+rnd(SUENA).en),qSpeed(rnd(SPEED)),
+   qLVC(rnd(LVC.filter(x=>x.cat==='B'))),qSound(rnd(MINPAIRS))].filter(Boolean);
+  runQuiz([...shuf(foco).slice(0,4),...shuf(mix).slice(0,8)].sort(()=>Math.random()-0.5),
+   sesDots()+'🧠 Enfoque: '+esc(etapaDef().tt)+' + repaso mezclado',r=>{SES.retAcc=r.n?r.ok/r.n:null;
+   main.innerHTML=`${sesDots()}<div class="card center"><p class="score">${r.ok}/${r.n}</p>
+   <button class="b p big" onclick="sesNext()">🗣️ A hablar →</button></div>`});return}
+ if(st===3){ // PUSH — las frases de la etapa (la meta Can-do, en la boca)
+  const e=etapaDef();
+  const[ex1,ex2,ex3]=e.push.length>=3?e.push:[...e.push,rnd(SOS).en,rnd(SOS).en].slice(0,3);
+  const c={en:ex3};
+  const slotFocus=e.focus.find(f=>f.startsWith('slot:'));
+  const sl=slotFocus?SLOTS.find(s=>s.id===slotFocus.slice(5)):SLOTS.find(s=>s.id===rnd(unlockedSlots()));
+  main.innerHTML=`${sesDots()}
+  <div class="card center"><p><b>1 · Planee 10 segundos</b> <span class="muted">(pensar antes mejora el habla)</span></p>
+   <p class="planring" id="plan">10</p>
+   <p class="muted">Va a decir, EN VOZ ALTA y grabándose:</p>
+   <p style="font-size:19px;font-weight:700">• ${esc(ex1)} ${spkBtn(ex1,'en')}<br>• ${esc(ex2)} ${spkBtn(ex2,'en')}<br>• ${esc(c.en)} ${spkBtn(c.en,'en')}</p>
+   <div id="pushRec" style="display:none">${recBar(ex1+'. '+ex2+'. '+c.en)}</div></div>
+  <div class="card center"><p><b>2 · Explíquelo usted</b> 👩‍🏫 <span class="muted">(enseñar es la forma más fuerte de aprender)</span></p>
+   <p style="font-size:18px">Explique con sus palabras, como a un amigo:<br><b>${esc(sl?sl.tt:'comí → I ate')}</b></p>
+   <div class="recbar"><button class="b" onclick="toggleRec(this,'')">🎙️ Grabar mi explicación</button>
+   <button class="b" onclick="playMe()">▶️ Escucharme</button></div></div>
+  <div class="row"><button class="b g big" onclick="sesNext()">🪞 Última parte →</button></div>`;
+  let t=10;const iv=setInterval(()=>{t--;const e=document.getElementById('plan');
+   if(!e){clearInterval(iv);return}
+   e.textContent=t>0?t:'¡Ya! 🎙️';
+   if(t<=0){clearInterval(iv);const r=document.getElementById('pushRec');if(r)r.style.display=''}},1000);
+  return}
+ if(st===4){go(reflectScr);return}
+ // fin
+ main.innerHTML='';go(home)}
+// ================= REFLECT =================
+function reflectScr(){title('🪞 Mirar atrás');
+ const keys=SES.keys.slice(-6);
+ const lbl=k=>{const[t,...r]=k.split('|');const id=r.join('|');
+  return t==='v'?id:t==='f'?'⚠️ '+id:t==='p'?id:t==='s'?('SOS #'+id):t==='vb'?('verbos: '+(SLOTS.find(s=>s.id===id)||{}).tt||id):t==='sp'?id:id};
+ const delta=(SES.primeAcc!==null&&SES.retAcc!==null)?Math.round((SES.retAcc-SES.primeAcc)*100):null;
+ const TIPS=['😴 La memoria se fija DURMIENDO. Hoy: acuéstese a buena hora.','🚶 20 minutos caminando antes de estudiar = el cerebro aprende mejor.','💧 Agua y descanso no son perder tiempo — son parte del estudio.','🌙 Repasar 5 minutos antes de dormir ayuda a fijar lo de hoy.'];
+ main.innerHTML=`${sesDots()}
+ <div class="card"><b>1 · ¿Cómo quedó cada cosa?</b> <small class="muted">🟡 y 🔴 vuelven mañana solos</small>
+  ${keys.length?keys.map((k,i)=>`<div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+   <span style="flex:1;font-size:16px">${esc(lbl(k))}</span>
+   <span class="lights" data-k="${esc(k)}">
+    <button class="lt" onclick="setLight(this,'g')">🟢</button>
+    <button class="lt" onclick="setLight(this,'y')">🟡</button>
+    <button class="lt" onclick="setLight(this,'r')">🔴</button></span></div>`).join(''):'<p class="muted">Hoy no hubo quiz — está bien.</p>'}
+ </div>
+ <div class="card"><b>2 · Tres victorias de hoy</b> <small class="muted">(por pequeñas que sean)</small>
+  <input class="tx" id="w1" placeholder="1. …"><input class="tx" id="w2" placeholder="2. …"><input class="tx" id="w3" placeholder="3. …"></div>
+ <div class="card"><b>3 · Una cosa que creía saber… y no sabía</b>
+  <input class="tx" id="meta" placeholder="ej.: 'embarazada' no es embarrassed"></div>
+ <div class="card"><b>4 · Intención para mañana</b> <small class="muted">("si pasa X, diré Y" — duplica el cumplimiento)</small>
+  <input class="tx" id="intent" placeholder="Si no entiendo algo, diré: Could you repeat that?"></div>
+ <p class="note">${rnd(TIPS)}</p>
+ ${delta!==null?`<p class="center muted">Hoy: recordar ${Math.round(SES.primeAcc*100)}% → después de practicar ${Math.round(SES.retAcc*100)}% ${delta>=0?'(+'+delta+' 📈)':''}</p>`:''}
+ <button class="b g big" onclick="finishSes()">✅ Terminar — soy una persona que aprende cada día</button>`}
+window.setLight=(btn,c)=>{const wrap=btn.parentElement;
+ wrap.querySelectorAll('.lt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+ const k=wrap.dataset.k,r=ST.srs[k];if(!r)return;
+ if(c==='y'){r.d=dayNum()+1;r.b=Math.min(r.b,1)}
+ if(c==='r'){r.d=dayNum();r.b=0}
+ save()};
+window.finishSes=()=>{
+ const g=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+ ST.reflect.push({date:new Date().toDateString(),wins:[g('w1'),g('w2'),g('w3')].filter(Boolean),meta:g('meta'),intent:g('intent')});
+ if(ST.reflect.length>30)ST.reflect.shift();
+ ST.idc++;ST.etapaSes++;save();SES.on=false;SES.stage=-1;
+ const ready=etapaReady(),e=etapaDef(),last=ST.etapa>=ETAPAS.length-1;
+ main.innerHTML=`<div class="card center"><p style="font-size:54px">🌳</p>
+ <p class="hometitle">Sesión ${ST.idc} completa</p>
+ <p class="muted">Usted no "estudió inglés".<br><b>Usted ES una persona que aprende cada día.</b><br>Día ${ST.idc} lo demuestra.</p>
+ ${g('intent')?`<p class="note">Mañana: ${esc(g('intent'))}</p>`:''}
+ ${ready&&!last?`<div class="nextact" onclick="advEtapa()"><span style="font-size:26px">🎯</span><div><b>¡Etapa ${ST.etapa+1} lista!</b><br><small class="muted">"${esc(e.can)}" ✓ — pasar a: ${esc(ETAPAS[ST.etapa+1].tt)}</small></div><span style="margin-left:auto">›</span></div>`
+  :`<p class="muted" style="font-size:15px">🧭 Etapa ${ST.etapa+1}/24 · ${esc(e.tt)} · sesión ${ST.etapaSes} aquí${ST.etapaSes<2?' (la etapa pide 2+)':''}</p>`}
+ <button class="b p big" onclick="go(home)">Inicio</button></div>`;
+ stack.length=0;stack.push([home,[]]);};
+// ================= ERRORES SON DATOS =================
+function errScr(){title('🧾 Mis errores = mi mapa');
+ const errs=Object.entries(ST.srs).filter(([k,r])=>r.w>0&&!r.fx).sort((a,b)=>b[1].w-a[1].w);
+ const fixed=Object.entries(ST.srs).filter(([k,r])=>r.fx);
+ const lbl=k=>{const[t,...r]=k.split('|');return r.join('|')};
+ const byTag={};for(const[k,r]of errs){const t=r.t||'otros';(byTag[t]=byTag[t]||[]).push([k,r])}
+ main.innerHTML=`<p class="center muted">Un error no es una falta — es el dato más valioso que usted produce.
+ <button class="spk sm" onclick="spk('Sus errores no son faltas. Son el mapa exacto de lo que falta practicar. Tres aciertos en días distintos, y el error queda vencido para siempre.','es')">🔊</button></p>
+ ${errs.length?`<div class="row" style="margin:10px 0"><button class="b p big" onclick="errPractice()">🎯 Practicar mis ${Math.min(errs.length,8)} errores ahora</button></div>`:''}
+ ${Object.entries(byTag).map(([tag,list])=>`<div class="card"><span class="errtag">${esc(tag)}</span> <small class="muted">${list.length}</small>
+  ${list.slice(0,8).map(([k,r])=>`<p style="margin:6px 0;font-size:17px">• ${esc(lbl(k))} <small class="muted">(falló ${r.w}×${r.fs?` · ${r.fs}/3 para vencerlo`:''})</small></p>`).join('')}</div>`).join('')||'<div class="card center">🎉 Sin errores pendientes.</div>'}
+ ${fixed.length?`<div class="card"><b>🏆 Errores vencidos para siempre (${fixed.length})</b>
+  <p class="muted" style="font-size:15px">${fixed.slice(-12).map(([k])=>esc(lbl(k))).join(' · ')}</p></div>`:''}`}
+window.errPractice=()=>{const errs=Object.entries(ST.srs).filter(([k,r])=>r.w>0&&!r.fx)
+ .sort((a,b)=>b[1].w-a[1].w).slice(0,8).map(([k])=>qFromKey(k)).filter(Boolean);
+ if(!errs.length)return;
+ runQuiz(errs,'🎯 Mis errores',r=>{main.innerHTML=`<div class="card center"><p class="score">${r.ok}/${r.n}</p>
+  <p class="muted">Cada acierto con días de distancia acerca el error a la lista de vencidos.</p>
+  <button class="b p big" onclick="go(errScr)">Ver mis errores</button></div>`})};
+// ================= NOTICING — resaltar formas =================
+const NOTICE={A1:[/\b((?!red\b|bed\b|need\b|feed\b|indeed\b|wed\b)\w{3,}ed)\b/gi,/\b(was|were)\b/gi],A2:[/\b(did|didn't|don't|doesn't)\b/gi,/\b(he|she) (\w+?s)\b/gi,/\b(will|won't)\b/gi],B1:[/\b(have|has|had) (\w+)\b/gi,/\b(used to)\b/gi],B2:[/\b(would|could|should)\b/gi,/\b(if)\b/gi]};
+function noticeHL(html){if(!ST.notice)return html;
+ const pats=NOTICE[ST.level]||NOTICE.A1;
+ return html.split(/(<[^>]+>)/).map(seg=>{if(seg.startsWith('<'))return seg;
+  let s=seg;for(const p of pats)s=s.replace(p,m=>''+m+'');
+  return s.replace(//g,'<span class="ntc">').replace(//g,'</span>')}).join('')}
+
+// ================= inicio =================
+go(home);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
